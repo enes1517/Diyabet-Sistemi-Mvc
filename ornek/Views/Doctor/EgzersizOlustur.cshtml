@@ -1,0 +1,48 @@
+﻿<!-- EgzersizOlustur.cshtml -->
+<!-- Form to create an exercise plan -->
+@{
+    ViewData["Title"] = "Egzersiz Planı Oluştur";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <h2>Egzersiz Planı Oluştur</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card">
+        <div class="card-header">Hasta: @ViewBag.Hasta["Ad"] @ViewBag.Hasta["Soyad"]</div>
+        <div class="card-body">
+            <form asp-action="EgzersizOlustur" method="post">
+                <input type="hidden" name="hastaId" value="@ViewBag.HastaID" />
+                <div class="form-group">
+                    <label>Egzersiz Türü</label>
+                    <select name="egzersizTuruId" class="form-control" required>
+                        <option value="">Egzersiz türü seçiniz...</option>
+                        @if (ViewBag.EgzersizTurleri != null)
+                        {
+                            foreach (System.Data.DataRow egzersiz in ViewBag.EgzersizTurleri.Rows)
+                            {
+                                <option value="@egzersiz["EgzersizTuruID"]">@egzersiz["TurAdi"] - @egzersiz["Aciklama"]</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Başlangıç Tarihi</label>
+                    <input type="date" name="baslangicTarihi" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Süre (Gün)</label>
+                    <input type="number" name="sureSayisi" class="form-control" min="1" required />
+                </div>
+                <button type="submit" class="btn btn-success">Planı Kaydet</button>
+            </form>
+        </div>
+    </div>
+</div>

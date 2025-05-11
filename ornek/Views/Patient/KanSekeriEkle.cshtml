@@ -1,0 +1,56 @@
+﻿@using System.Data
+@model dynamic
+@{
+    ViewData["Title"] = "Kan Şekeri Ekle";
+}
+
+<div class="container mt-5">
+    <h2>Kan Şekeri Ekle</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-action="KanSekeriEkle" method="post">
+        <div class="form-group mb-3">
+            <label for="olcumDegeri">Ölçüm Değeri (mg/dL)</label>
+            <input type="number" step="0.1" class="form-control" id="olcumDegeri" name="olcumDegeri" required />
+        </div>
+        <div class="form-group mb-3">
+            <label for="olcumTarihi">Ölçüm Tarihi</label>
+            <input type="date" class="form-control" id="olcumTarihi" name="olcumTarihi" required />
+        </div>
+        <div class="form-group mb-3">
+            <label for="olcumSaati">Ölçüm Saati</label>
+            <input type="time" class="form-control" id="olcumSaati" name="olcumSaati" required />
+        </div>
+        <div class="form-group mb-3">
+            <label for="olcumTuru">Ölçüm Türü</label>
+            <select class="form-control" id="olcumTuru" name="olcumTuru" required>
+                <option value="Açlık">Açlık</option>
+                <option value="Tokluk">Tokluk</option>
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="belirtiId">Belirti (Opsiyonel)</label>
+            <select class="form-control" id="belirtiId" name="belirtiId">
+                <option value="">Belirti Seçiniz</option>
+                @foreach (DataRow row in ViewBag.Belirtiler.Rows)
+                {
+                    <option value="@row["BelirtiID"]">@row["BelirtiAdi"]</option>
+                }
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="siddet">Belirti Şiddeti (Opsiyonel, 1-10)</label>
+            <input type="number" min="1" max="10" class="form-control" id="siddet" name="siddet" />
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <a asp-action="Index" class="btn btn-secondary">Geri</a>
+    </form>
+</div>

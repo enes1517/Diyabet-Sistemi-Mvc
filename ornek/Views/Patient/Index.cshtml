@@ -1,0 +1,155 @@
+﻿@using System.Data
+@model dynamic
+@{
+    ViewData["Title"] = "Hasta Paneli";
+}
+
+<div class="container mt-5">
+    <h2>Hasta Paneli</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- Kullanıcı Bilgileri -->
+    <h3>Kullanıcı Bilgileri</h3>
+    <table class="table table-bordered">
+        <tr>
+            <th>Ad</th>
+            <td>@ViewBag.Kullanici.Rows[0]["Ad"]</td>
+        </tr>
+        <tr>
+            <th>Soyad</th>
+            <td>@ViewBag.Kullanici.Rows[0]["Soyad"]</td>
+        </tr>
+    </table>
+
+    <!-- Hasta Bilgileri -->
+    <h3>Hasta Bilgileri</h3>
+    <table class="table table-bordered">
+        <tr>
+            <th>Boy</th>
+            <td>@ViewBag.Hasta["Boy"] cm</td>
+        </tr>
+        <tr>
+            <th>Kilo</th>
+            <td>@ViewBag.Hasta["Kilo"] kg</td>
+        </tr>
+    </table>
+
+    <!-- Kan Şekeri Kayıtları -->
+    <h3>Kan Şekeri Kayıtları</h3>
+    <a asp-action="KanSekeriEkle" class="btn btn-primary mb-3">Yeni Ölçüm Ekle</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ölçüm Değeri</th>
+                <th>Tarih</th>
+                <th>Saat</th>
+                <th>Ölçüm Türü</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in ViewBag.KanSekeri.Rows)
+            {
+                <tr>
+                    <td>@row["OlcumDegeri"]</td>
+                    <td>@row["OlcumTarihi"]</td>
+                    <td>@row["OlcumSaati"]</td>
+                    <td>@row["OlcumTuru"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Diyet Kayıtları -->
+    <h3>Diyet Kayıtları</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Diyet Türü</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in ViewBag.Diyet.Rows)
+            {
+                <tr>
+                    <td>@row["TurAdi"]</td>
+                    <td>@row["Tarih"]</td>
+                    <td>@(Convert.ToBoolean(row["UygulandiMi"]) ? "Uygulandı" : "Uygulanmadı")</td>
+                    <td>
+                        <form asp-action="DiyetGuncelle" method="post" style="display:inline;">
+                            <input type="hidden" name="diyetId" value="@row["DiyetID"]" />
+                            <input type="hidden" name="uygulandiMi" value="@(!Convert.ToBoolean(row["UygulandiMi"]))" />
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                @(Convert.ToBoolean(row["UygulandiMi"]) ? "Uygulanmadı Yap" : "Uygulandı Yap")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Egzersiz Kayıtları -->
+    <h3>Egzersiz Kayıtları</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Egzersiz Türü</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in ViewBag.Egzersiz.Rows)
+            {
+                <tr>
+                    <td>@row["TurAdi"]</td>
+                    <td>@row["Tarih"]</td>
+                    <td>@(Convert.ToBoolean(row["YapildiMi"]) ? "Yapıldı" : "Yapılmadı")</td>
+                    <td>
+                        <form asp-action="EgzersizGuncelle" method="post" style="display:inline;">
+                            <input type="hidden" name="egzersizId" value="@row["EgzersizID"]" />
+                            <input type="hidden" name="yapildiMi" value="@(!Convert.ToBoolean(row["YapildiMi"]))" />
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                @(Convert.ToBoolean(row["YapildiMi"]) ? "Yapılmadı Yap" : "Yapıldı Yap")
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Belirti Kayıtları -->
+    <h3>Belirti Kayıtları</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Belirti</th>
+                <th>Tarih</th>
+                <th>Şiddet</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in ViewBag.Belirtiler.Rows)
+            {
+                <tr>
+                    <td>@row["BelirtiAdi"]</td>
+                    <td>@row["Tarih"]</td>
+                    <td>@row["Siddet"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

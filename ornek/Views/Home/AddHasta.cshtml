@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasta Ekle - Diyabet Takip Sistemi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Hasta Ekle</h2>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        <div class="card">
+            <div class="card-header">Sistemdeki Hastalar</div>
+            <div class="card-body">
+                @if (ViewBag.Hastalar != null && ViewBag.Hastalar.Rows.Count > 0)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Ad Soyad</th>
+                                <th>T.C. Kimlik</th>
+                                <th>E-posta</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (System.Data.DataRow hasta in ViewBag.Hastalar.Rows)
+                            {
+                                <tr>
+                                    <td>@hasta["Ad"] @hasta["Soyad"]</td>
+                                    <td>@hasta["TC"]</td>
+                                    <td>@hasta["Email"]</td>
+                                    <td>
+                                        <form asp-action="HastaEkle" method="post">
+                                            <input type="hidden" name="hastaId" value="@hasta["HastaID"]" />
+                                            <button type="submit" class="btn btn-success btn-sm">Ekle</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>Sisteme kayıtlı uygun hasta bulunmamaktadır.</p>
+                }
+            </div>
+        </div>
+        <div class="mt-3">
+            <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

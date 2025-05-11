@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasta Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Hasta Paneli</h2>
+        <div class="mb-3">
+            <a asp-action="AddKanSekeri" class="btn btn-success">Kan Şekeri Ekle</a>
+            <a asp-action="Login" class="btn btn-danger float-end">Çıkış Yap</a>
+        </div>
+        <h4>Profil Bilgileri</h4>
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Ad:</strong> @Model.Kullanici.Ad</p>
+                <p><strong>Soyad:</strong> @Model.Kullanici.Soyad</p>
+                <p><strong>E-posta:</strong> @Model.Kullanici.Email</p>
+                <p><strong>Boy:</strong> @(Model.Boy?.ToString("F0") ?? "-") cm</p>
+                <p><strong>Kilo:</strong> @(Model.Kilo?.ToString("F0") ?? "-") kg</p>
+            </div>
+        </div>
+        <!-- Placeholder for kan şekeri grafiği, diyet/egzersiz takibi -->
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+﻿<!-- Profil.cshtml -->
+<!-- Doctor profile management -->
+@{
+    ViewData["Title"] = "Doktor Profili";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <h2>Profil</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card">
+        <div class="card-header">Profil Bilgileri</div>
+        <div class="card-body">
+            <form asp-action="ProfilGuncelle" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Ad</label>
+                    <input type="text" name="ad" class="form-control" value="@ViewBag.Kullanici["Ad"]" required />
+                </div>
+                <div class="form-group">
+                    <label>Soyad</label>
+                    <input type="text" name="soyad" class="form-control" value="@ViewBag.Kullanici["Soyad"]" required />
+                </div>
+                <div class="form-group">
+                    <label>E-posta</label>
+                    <input type="email" name="email" class="form-control" value="@ViewBag.Kullanici["Email"]" required />
+                </div>
+                <div class="form-group">
+                    <label>Uzmanlık</label>
+                    <input type="text" name="uzmanlik" class="form-control" value="@(ViewBag.Doktor != null ? ViewBag.Doktor["Uzmanlik"] : "")" />
+                </div>
+                <div class="form-group">
+                    <label>Profil Resmi</label>
+                    <input type="file" name="profilResim" class="form-control" accept="image/*" />
+                    @if (ViewBag.Kullanici["ProfilResim"] != DBNull.Value)
+                    {
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String((byte[])ViewBag.Kullanici["ProfilResim"])" alt="Profil Resmi" class="img-thumbnail mt-2" style="max-width: 100px;" />
+                    }
+                </div>
+                <button type="submit" class="btn btn-success">Güncelle</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">Şifre Değiştir</div>
+        <div class="card-body">
+            <form asp-action="SifreDegistir" method="post">
+                <div class="form-group">
+                    <label>Eski Şifre</label>
+                    <input type="password" name="eskiSifre" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Yeni Şifre</label>
+                    <input type="password" name="yeniSifre" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Yeni Şifre Tekrar</label>
+                    <input type="password" name="yeniSifreTekrar" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-success">Şifreyi Değiştir</button>
+            </form>
+        </div>
+    </div>
+</div>

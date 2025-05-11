@@ -1,0 +1,57 @@
+﻿@model Proje3.Models.LoginModel
+
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Diyabet Takip Sistemi</h3>
+                    <h5>Giriş Yap</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["SuccessMessage"]
+                        </div>
+                    }
+
+                    <form asp-action="Login" asp-controller="Account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="TC" class="control-label">TC Kimlik Numarası</label>
+                            <input asp-for="TC" class="form-control" placeholder="11 haneli TC kimlik numaranızı giriniz" />
+                            <span asp-validation-for="TC" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Sifre" class="control-label">Şifre</label>
+                            <input asp-for="Sifre" class="form-control" type="password" placeholder="Şifrenizi giriniz" />
+                            <span asp-validation-for="Sifre" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group d-grid mb-3">
+                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                        </div>
+
+                        <div class="text-center">
+                            <p>Hesabınız yok mu? <a asp-action="Register" asp-controller="Account">Kayıt Ol</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

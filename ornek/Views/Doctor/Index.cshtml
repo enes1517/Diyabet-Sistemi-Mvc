@@ -1,0 +1,100 @@
+﻿<!-- Index.cshtml -->
+<!-- Main dashboard for the doctor -->
+@{
+    ViewData["Title"] = "Doktor Ana Sayfa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <h2>Doktor Ana Sayfa</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- Doktor Bilgileri -->
+    <div class="card mb-4">
+        <div class="card-header">Doktor Bilgileri</div>
+        <div class="card-body">
+            @if (ViewBag.DoktorBilgi != null && ViewBag.DoktorBilgi.Rows.Count > 0)
+            {
+                var doktor = ViewBag.DoktorBilgi.Rows[0];
+                <p><strong>Ad Soyad:</strong> @doktor["Ad"] @doktor["Soyad"]</p>
+                <p><strong>E-posta:</strong> @doktor["Email"]</p>
+                <p><strong>TC:</strong> @doktor["TC"]</p>
+            }
+        </div>
+    </div>
+
+    <!-- Hastalar Listesi -->
+    <div class="card mb-4">
+        <div class="card-header">Hastalarım</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>TC</th>
+                        <th>E-posta</th>
+                        <th>Boy (cm)</th>
+                        <th>Kilo (kg)</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Hastalar != null)
+                    {
+                        foreach (System.Data.DataRow hasta in ViewBag.Hastalar.Rows)
+                        {
+                            <tr>
+                                <td>@hasta["Ad"] @hasta["Soyad"]</td>
+                                <td>@hasta["TC"]</td>
+                                <td>@hasta["Email"]</td>
+                                <td>@hasta["Boy"]</td>
+                                <td>@hasta["Kilo"]</td>
+                                <td>
+                                    <a href="@Url.Action("HastaDetay", "Doctor", new { id = hasta["HastaID"] })" class="btn btn-primary btn-sm">Detay</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <a href="@Url.Action("HastaEkle", "Doctor")" class="btn btn-success">Yeni Hasta Ekle</a>
+        </div>
+    </div>
+
+    <!-- Uyarılar -->
+    <div class="card">
+        <div class="card-header">Okunmamış Uyarılar</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Hasta</th>
+                        <th>Uyarı Türü</th>
+                        <th>Mesaj</th>
+                        <th>Tarih</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Uyarilar != null)
+                    {
+                        foreach (System.Data.DataRow uyari in ViewBag.Uyarilar.Rows)
+                        {
+                            <tr>
+                                <td>@uyari["HastaAdSoyad"]</td>
+                                <td>@uyari["UyariTuru"]</td>
+                                <td>@uyari["UyariMesaji"]</td>
+                                <td>@Convert.ToDateTime(uyari["UyariTarihi"]).ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

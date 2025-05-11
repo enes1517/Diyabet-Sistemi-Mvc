@@ -1,0 +1,48 @@
+﻿<!-- DiyetOlustur.cshtml -->
+<!-- Form to create a diet plan -->
+@{
+    ViewData["Title"] = "Diyet Planı Oluştur";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <h2>Diyet Planı Oluştur</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card">
+        <div class="card-header">Hasta: @ViewBag.Hasta["Ad"] @ViewBag.Hasta["Soyad"]</div>
+        <div class="card-body">
+            <form asp-action="DiyetOlustur" method="post">
+                <input type="hidden" name="hastaId" value="@ViewBag.HastaID" />
+                <div class="form-group">
+                    <label>Diyet Türü</label>
+                    <select name="diyetTuruId" class="form-control" required>
+                        <option value="">Diyet türü seçiniz...</option>
+                        @if (ViewBag.DiyetTurleri != null)
+                        {
+                            foreach (System.Data.DataRow diyet in ViewBag.DiyetTurleri.Rows)
+                            {
+                                <option value="@diyet["DiyetTuruID"]">@diyet["TurAdi"] - @diyet["Aciklama"]</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Başlangıç Tarihi</label>
+                    <input type="date" name="baslangicTarihi" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Süre (Gün)</label>
+                    <input type="number" name="sureSayisi" class="form-control" min="1" required />
+                </div>
+                <button type="submit" class="btn btn-success">Planı Kaydet</button>
+            </form>
+        </div>
+    </div>
+</div>

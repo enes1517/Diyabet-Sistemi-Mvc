@@ -1,0 +1,25 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="container mt-5">
+    <h2>Giriş Yap</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <form asp-action="Login" asp-controller="Account" method="post">
+        <div class="form-group mb-3">
+            <label for="tc">TC Kimlik No</label>
+            <input type="text" class="form-control" id="tc" name="tc" required />
+        </div>
+        <div class="form-group mb-3">
+            <label for="sifre">Şifre</label>
+            <input type="password" class="form-control" id="sifre" name="sifre" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+    </form>
+</div>

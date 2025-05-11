@@ -1,0 +1,325 @@
+﻿<!-- HastaDetay.cshtml -->
+@{
+    ViewData["Title"] = "Hasta Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container mt-4">
+    <h2>Hasta Detayları</h2>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <!-- Recent Patient Activity -->
+    <div class="card mb-4">
+        <div class="card-header">Son Hasta Aktiviteleri</div>
+        <div class="card-body">
+            <h5>Son Kan Şekeri Ölçümleri</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Değer (mg/dL)</th>
+                        <th>Tarih</th>
+                        <th>Saat</th>
+                        <th>Tür</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.RecentKanSekeri != null)
+                    {
+                        foreach (System.Data.DataRow olcum in ViewBag.RecentKanSekeri.Rows)
+                        {
+                            <tr>
+                                <td>@olcum["OlcumDegeri"]</td>
+                                <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
+                                <td>@olcum["OlcumSaati"]</td>
+                                <td>@olcum["OlcumTuru"]</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <h5>Son Belirtiler</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Belirti</th>
+                        <th>Tarih</th>
+                        <th>Şiddet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.RecentBelirtiler != null)
+                    {
+                        foreach (System.Data.DataRow belirti in ViewBag.RecentBelirtiler.Rows)
+                        {
+                            <tr>
+                                <td>@belirti["BelirtiAdi"]</td>
+                                <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@belirti["Siddet"]</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <h5>Son Diyet Güncellemeleri</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Diyet Türü</th>
+                        <th>Tarih</th>
+                        <th>Uygulandı mı?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.RecentDiyet != null)
+                    {
+                        foreach (System.Data.DataRow diyet in ViewBag.RecentDiyet.Rows)
+                        {
+                            <tr>
+                                <td>@diyet["TurAdi"]</td>
+                                <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <h5>Son Egzersiz Güncellemeleri</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Egzersiz Türü</th>
+                        <th>Tarih</th>
+                        <th>Yapıldı mı?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.RecentEgzersiz != null)
+                    {
+                        foreach (System.Data.DataRow egzersiz in ViewBag.RecentEgzersiz.Rows)
+                        {
+                            <tr>
+                                <td>@egzersiz["TurAdi"]</td>
+                                <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Hasta Bilgileri -->
+    <div class="card mb-4">
+        <div class="card-header">Hasta Bilgileri</div>
+        <div class="card-body">
+            @if (ViewBag.Hasta != null)
+            {
+                var hasta = ViewBag.Hasta;
+                <p><strong>Ad Soyad:</strong> @hasta["Ad"] @hasta["Soyad"]</p>
+                <p><strong>TC:</strong> @hasta["TC"]</p>
+                <p><strong>E-posta:</strong> @hasta["Email"]</p>
+                <p><strong>Doğum Tarihi:</strong> @Convert.ToDateTime(hasta["DogumTarihi"]).ToString("dd.MM.yyyy")</p>
+                <p><strong>Cinsiyet:</strong> @hasta["Cinsiyet"]</p>
+                <p><strong>Boy:</strong> @hasta["Boy"] cm</p>
+                <p><strong>Kilo:</strong> @hasta["Kilo"] kg</p>
+                @if (hasta["ProfilResim"] != DBNull.Value)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String((byte[])hasta["ProfilResim"])" alt="Profil Resmi" class="img-thumbnail" style="max-width: 100px;" />
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Kan Şekeri Ölçümleri -->
+    <div class="card mb-4">
+        <div class="card-header">Kan Şekeri Ölçümleri</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Değer (mg/dL)</th>
+                        <th>Tarih</th>
+                        <th>Saat</th>
+                        <th>Tür</th>
+                        <th>Son Güncelleme</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.KanSekeri != null)
+                    {
+                        foreach (System.Data.DataRow olcum in ViewBag.KanSekeri.Rows)
+                        {
+                            <tr>
+                                <td>@olcum["OlcumDegeri"]</td>
+                                <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
+                                <td>@olcum["OlcumSaati"]</td>
+                                <td>@olcum["OlcumTuru"]</td>
+                                <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Belirtiler -->
+    <div class="card mb-4">
+        <div class="card-header">Belirtiler</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Belirti</th>
+                        <th>Tarih</th>
+                        <th>Şiddet</th>
+                        <th>Son Güncelleme</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Belirtiler != null)
+                    {
+                        foreach (System.Data.DataRow belirti in ViewBag.Belirtiler.Rows)
+                        {
+                            <tr>
+                                <td>@belirti["BelirtiAdi"]</td>
+                                <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@belirti["Siddet"]</td>
+                                <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- İnsülin Uygulamaları -->
+    <div class="card mb-4">
+        <div class="card-header">İnsülin Uygulamaları</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Doz (ml)</th>
+                        <th>Tarih</th>
+                        <th>Saat</th>
+                        <th>Ortalama Kan Şekeri</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Insulin != null)
+                    {
+                        foreach (System.Data.DataRow insulin in ViewBag.Insulin.Rows)
+                        {
+                            <tr>
+                                <td>@insulin["Doz"]</td>
+                                <td>@Convert.ToDateTime(insulin["UygulamaTarihi"]).ToString("dd.MM.yyyy")</td>
+                                <td>@insulin["UygulamaSaati"]</td>
+                                <td>@insulin["OrtalamaKanSekeri"]</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Diyet Takibi -->
+    <div class="card mb-4">
+        <div class="card-header">Diyet Takibi</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Diyet Türü</th>
+                        <th>Tarih</th>
+                        <th>Uygulandı mı?</th>
+                        <th>Son Güncelleme</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Diyet != null)
+                    {
+                        foreach (System.Data.DataRow diyet in ViewBag.Diyet.Rows)
+                        {
+                            <tr>
+                                <td>@diyet["TurAdi"]</td>
+                                <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
+                                <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <a href="@Url.Action("DiyetOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Diyet Planı Oluştur</a>
+        </div>
+    </div>
+
+    <!-- Egzersiz Takibi -->
+    <div class="card mb-4">
+        <div class="card-header">Egzersiz Takibi</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Egzersiz Türü</th>
+                        <th>Tarih</th>
+                        <th>Yapıldı mı?</th>
+                        <th>Son Güncelleme</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Egzersiz != null)
+                    {
+                        foreach (System.Data.DataRow egzersiz in ViewBag.Egzersiz.Rows)
+                        {
+                            <tr>
+                                <td>@egzersiz["TurAdi"]</td>
+                                <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
+                                <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
+                                <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <a href="@Url.Action("EgzersizOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Egzersiz Planı Oluştur</a>
+        </div>
+    </div>
+
+    <!-- Uyarı Oluştur -->
+    <div class="card">
+        <div class="card-header">Yeni Uyarı Oluştur</div>
+        <div class="card-body">
+            <form asp-action="UyariOlustur" method="post">
+                <input type="hidden" name="hastaId" value="@ViewBag.Hasta["HastaID"]" />
+                <div class="form-group">
+                    <label>Uyarı Türü</label>
+                    <select name="uyariTuru" class="form-control" required>
+                        <option value="Acil Uyarı">Acil Uyarı</option>
+                        <option value="Takip Uyarısı">Takip Uyarısı</option>
+                        <option value="Ölçüm Eksik Uyarısı">Ölçüm Eksik Uyarısı</option>
+                        <option value="Ölçüm Yetersiz Uyarısı">Ölçüm Yetersiz Uyarısı</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Uyarı Mesajı</label>
+                    <textarea name="uyariMesaji" class="form-control" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Uyarı Gönder</button>
+            </form>
+        </div>
+    </div>
+</div>

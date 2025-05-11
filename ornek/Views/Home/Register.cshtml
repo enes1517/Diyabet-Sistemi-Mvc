@@ -1,0 +1,178 @@
+﻿@model Proje3.Models.RegisterModel
+
+@{
+    ViewData["Title"] = "Kayıt Ol";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4 mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Diyabet Takip Sistemi</h3>
+                    <h5>Kayıt Formu</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register" asp-controller="Account" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="TC" class="control-label">TC Kimlik Numarası</label>
+                                    <input asp-for="TC" class="form-control" placeholder="11 haneli TC kimlik numaranızı giriniz" />
+                                    <span asp-validation-for="TC" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Email" class="control-label">E-posta</label>
+                                    <input asp-for="Email" class="form-control" type="email" placeholder="E-posta adresinizi giriniz" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Ad" class="control-label">Ad</label>
+                                    <input asp-for="Ad" class="form-control" placeholder="Adınızı giriniz" />
+                                    <span asp-validation-for="Ad" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Soyad" class="control-label">Soyad</label>
+                                    <input asp-for="Soyad" class="form-control" placeholder="Soyadınızı giriniz" />
+                                    <span asp-validation-for="Soyad" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Sifre" class="control-label">Şifre</label>
+                                    <input asp-for="Sifre" class="form-control" type="password" placeholder="En az 6 karakter" />
+                                    <span asp-validation-for="Sifre" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="SifreTekrar" class="control-label">Şifre Tekrar</label>
+                                    <input asp-for="SifreTekrar" class="form-control" type="password" placeholder="Şifrenizi tekrar giriniz" />
+                                    <span asp-validation-for="SifreTekrar" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="DogumTarihi" class="control-label">Doğum Tarihi</label>
+                                    <input asp-for="DogumTarihi" class="form-control" type="date" />
+                                    <span asp-validation-for="DogumTarihi" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Cinsiyet" class="control-label">Cinsiyet</label>
+                                    <select asp-for="Cinsiyet" class="form-control">
+                                        <option value="">Seçiniz</option>
+                                        <option value="Erkek">Erkek</option>
+                                        <option value="Kadın">Kadın</option>
+                                    </select>
+                                    <span asp-validation-for="Cinsiyet" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="KullaniciTipi" class="control-label">Kullanıcı Tipi</label>
+                            <select asp-for="KullaniciTipi" class="form-control" id="kullaniciTipi">
+                                <option value="">Seçiniz</option>
+                                <option value="Doktor">Doktor</option>
+                                <option value="Hasta">Hasta</option>
+                            </select>
+                            <span asp-validation-for="KullaniciTipi" class="text-danger"></span>
+                        </div>
+
+                        <!-- Doktor özel alanları -->
+                        <div id="doktorAlanlari" class="d-none">
+                            <div class="form-group mb-3">
+                                <label asp-for="Uzmanlik" class="control-label">Uzmanlık Alanı</label>
+                                <input asp-for="Uzmanlik" class="form-control" placeholder="Uzmanlık alanınızı giriniz" />
+                                <span asp-validation-for="Uzmanlik" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Hasta özel alanları -->
+                        <div id="hastaAlanlari" class="d-none">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Boy" class="control-label">Boy (cm)</label>
+                                        <input asp-for="Boy" class="form-control" type="number" placeholder="Boyunuzu cm cinsinden giriniz" />
+                                        <span asp-validation-for="Boy" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label asp-for="Kilo" class="control-label">Kilo (kg)</label>
+                                        <input asp-for="Kilo" class="form-control" type="number" step="0.1" placeholder="Kilonuzu kg cinsinden giriniz" />
+                                        <span asp-validation-for="Kilo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="control-label">Profil Resmi</label>
+                            <input name="profilResim" type="file" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="form-group d-grid mb-3">
+                            <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+                        </div>
+
+                        <div class="text-center">
+                            <p>Zaten hesabınız var mı? <a asp-action="Login" asp-controller="Account">Giriş Yap</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#kullaniciTipi').change(function () {
+                var secim = $(this).val();
+
+                if (secim === 'Doktor') {
+                    $('#doktorAlanlari').removeClass('d-none');
+                    $('#hastaAlanlari').addClass('d-none');
+                } else if (secim === 'Hasta') {
+                    $('#doktorAlanlari').addClass('d-none');
+                    $('#hastaAlanlari').removeClass('d-none');
+                } else {
+                    $('#doktorAlanlari').addClass('d-none');
+                    $('#hastaAlanlari').addClass('d-none');
+                }
+            });
+        });
+    </script>
+}
