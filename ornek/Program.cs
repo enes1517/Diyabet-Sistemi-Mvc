@@ -2,7 +2,7 @@ using ornek.Models;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddHostedService<DailyMeasurementCheckService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IEmailService, EmailService>();

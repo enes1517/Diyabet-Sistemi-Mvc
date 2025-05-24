@@ -5,77 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Diyabet Takip Sistemi</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            background-color: #f4f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #007bff !important;
+        }
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .footer {
+            background-color: #ffffff;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-toggler {
+            border: none;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-heartbeat me-2"></i>Diyabet Takip Sistemi
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Account" asp-action="Login">
+                    <i class="fas fa-heartbeat me-2"></i> Diyabet Takip
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         @if (Context.Session.GetString("UserType") != null)
                         {
                             @if (Context.Session.GetString("UserType") == "Doktor")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Doctor" asp-action="Index">Ana Sayfa</a>
+                                    <a class="nav-link text-light" asp-controller="Doctor" asp-action="Index">
+                                        <i class="fas fa-home me-1"></i> Ana Sayfa
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Doctor" asp-action="Patients">Hastalarım</a>
+                                    <a class="nav-link text-light" asp-controller="Doctor" asp-action="HastaEkle">
+                                        <i class="fas fa-user-plus me-1"></i> Hasta Ekle
+                                    </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Doctor" asp-action="Alerts">Uyarılar</a>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-light dropdown-toggle" href="#" id="hastaYonetimDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-users-cog me-1"></i> Hasta Yönetimi
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="hastaYonetimDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Doctor" asp-action="Index">Hasta Listesi</a></li>
+                                    </ul>
                                 </li>
                             }
                             else if (Context.Session.GetString("UserType") == "Hasta")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="Index">Ana Sayfa</a>
+                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="Index">
+                                        <i class="fas fa-home me-1"></i> Ana Sayfa
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="BloodSugar">Kan Şekeri</a>
+                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="KanSekeriEkle">
+                                        <i class="fas fa-tint me-1"></i> Kan Şekeri Ekle
+                                    </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="Diet">Diyet</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="Exercise">Egzersiz</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-light" asp-controller="Patient" asp-action="Insulin">İnsülin</a>
-                                </li>
+                              
                             }
-                        }
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (Context.Session.GetString("UserType") != null)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-user-circle me-1"></i>Hesabım
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Profil</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Çıkış Yap</a></li>
-                                </ul>
-                            </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Giriş Yap</a>
+                                <a class="nav-link text-light" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Giriş Yap
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-light" asp-controller="Account" asp-action="Register">Kayıt Ol</a>
+                                <a class="nav-link text-light" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus me-1"></i> Kayıt Ol
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (Context.Session.GetString("UserType") != null)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-light dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle me-1"></i> @Context.Session.GetString("UserType")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="@(Context.Session.GetString("UserType") == "Doktor" ? "Doctor" : "Patient")" asp-action="Profil">
+                                            <i class="fas fa-user me-1"></i> Profil
+                                        </a>
+                                    </li>
+                                   
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
+                                            <i class="fas fa-sign-out-alt me-1"></i> Çıkış Yap
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                     </ul>
@@ -84,18 +140,53 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container my-4">
+        <main role="main">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted bg-light">
-        <div class="container text-center py-3">
-            &copy; @DateTime.Now.Year - Diyabet Takip Sistemi - Kocaeli Üniversitesi Bilgisayar Mühendisliği
-        </div>
+    <footer class="border-top footer text-muted bg-white mt-5">
+        <div class="container text-center py-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6 class="fw-bold">Diyabet Takip Sistemi</h6>
+                    <p>Sağlığınızı takip edin, hayatınıza değer katın.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold">Hızlı Bağlantılar</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted text-decoration-none">Hakkımızda</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">İletişim</a></li>
+                        <li><a href="#" class="text-muted text-decoration-none">Gizlilik Politikası</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold">İletişim</h6>
+                    <p><i class="fas fa-envelope me-2"></i> destek@diyabettakip.com</p>
+                    <p><i class="fas fa-phone me-2"></i> +90 123 456 7890</p>
+                </div>
+            </div>
+            <hr />
+            <p>&copy; @DateTime.Now.Year - Diyabet Takip Sistemi - Kocaeli Üniversitesi Bilgisayar Mühendisliği</p>
     </footer>
-
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

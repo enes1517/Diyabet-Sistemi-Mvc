@@ -1,0 +1,199 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Hasta Arşiv";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    
+
+    <main class="container mx-auto mt-8 px-4">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        <h2 class="text-2xl font-semibold mb-4">@ViewBag.Hasta["Ad"] @ViewBag.Hasta["Soyad"] - Arşiv</h2>
+
+        <!-- Date Range Filter -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Tarih Aralığı Filtresi</h3>
+            <form asp-action="HastaArsiv" asp-controller="Doctor" method="get" class="space-y-4">
+                <input type="hidden" name="id" value="@ViewBag.Hasta["HastaID"]" />
+                <div class="flex space-x-4">
+                    <div>
+                        <label class="block text-sm font-medium">Başlangıç Tarihi:</label>
+                        <input type="date" name="BaslangicTarihi" value="@(((DateTime)ViewBag.BaslangicTarihi).ToString("yyyy-MM-dd"))" class="mt-1 p-2 border rounded w-full" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Bitiş Tarihi:</label>
+                        <input type="date" name="BitisTarihi" value="@(((DateTime)ViewBag.BitisTarihi).ToString("yyyy-MM-dd"))" class="mt-1 p-2 border rounded w-full" />
+                    </div>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Filtrele</button>
+            </form>
+        </section>
+
+        <!-- Compliance Percentages -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Uyum Oranları</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="font-medium">Diyet Uyum Oranı:</p>
+                    <p>@String.Format("{0:F2}%", ViewBag.DietCompliance)</p>
+                </div>
+                <div>
+                    <p class="font-medium">Egzersiz Uyum Oranı:</p>
+                    <p>@String.Format("{0:F2}%", ViewBag.ExerciseCompliance)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blood Sugar Measurements -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Kan Şekeri Ölçümleri</h3>
+            @if (ViewBag.KanSekeri.Rows.Count > 0)
+            {
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Ölçüm Tarihi</th>
+                            <th class="border p-2">Ölçüm Saati</th>
+                            <th class="border p-2">Değer (mg/dL)</th>
+                            <th class="border p-2">Ölçüm Türü</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow row in ViewBag.KanSekeri.Rows)
+                        {
+                            <tr>
+                                <td class="border p-2">@(((DateTime)row["OlcumTarihi"]).ToString("dd.MM.yyyy"))</td>
+                                <td class="border p-2">@row["OlcumSaati"]</td>
+                                <td class="border p-2">@row["OlcumDegeri"]</td>
+                                <td class="border p-2">@row["OlcumTuru"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-gray-600">Seçilen tarih aralığında kan şekeri ölçümü bulunmamaktadır.</p>
+            }
+        </section>
+
+        <!-- Symptoms -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Belirtiler</h3>
+            @if (ViewBag.Belirtiler.Rows.Count > 0)
+            {
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Tarih</th>
+                            <th class="border p-2">Belirti</th>
+                            <th class="border p-2">Şiddet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow row in ViewBag.Belirtiler.Rows)
+                        {
+                            <tr>
+                                <td class="border p-2">@(((DateTime)row["Tarih"]).ToString("dd.MM.yyyy"))</td>
+                                <td class="border p-2">@row["BelirtiAdi"]</td>
+                                <td class="border p-2">@row["Siddet"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-gray-600">Seçilen tarih aralığında belirti kaydı bulunmamaktadır.</p>
+            }
+        </section>
+
+       
+
+        <!-- Diet Plans -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Diyet Planları</h3>
+            @if (ViewBag.Diyet.Rows.Count > 0)
+            {
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Tarih</th>
+                            <th class="border p-2">Diyet Türü</th>
+                            <th class="border p-2">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow row in ViewBag.Diyet.Rows)
+                        {
+                            <tr>
+                                <td class="border p-2">@(((DateTime)row["Tarih"]).ToString("dd.MM.yyyy"))</td>
+                                <td class="border p-2">@row["TurAdi"]</td>
+                                <td class="border p-2">@(Convert.ToBoolean(row["UygulandiMi"]) ? "Uygulandı" : "Uygulanmadı")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-gray-600">Seçilen tarih aralığında diyet kaydı bulunmamaktadır.</p>
+            }
+        </section>
+
+        <!-- Exercise Plans -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 class="text-xl font-semibold mb-4">Egzersiz Planları</h3>
+            @if (ViewBag.Egzersiz.Rows.Count > 0)
+            {
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Tarih</th>
+                            <th class="border p-2">Egzersiz Türü</th>
+                            <th class="border p-2">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (System.Data.DataRow row in ViewBag.Egzersiz.Rows)
+                        {
+                            <tr>
+                                <td class="border p-2">@(((DateTime)row["Tarih"]).ToString("dd.MM.yyyy"))</td>
+                                <td class="border p-2">@row["TurAdi"]</td>
+                                <td class="border p-2">@(Convert.ToBoolean(row["YapildiMi"]) ? "Yapıldı" : "Yapılmadı")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-gray-600">Seçilen tarih aralığında egzersiz kaydı bulunmamaktadır.</p>
+            }
+        </section>
+
+        <!-- Back to Patient Detail -->
+        <div class="mb-8">
+            <a href="@Url.Action("HastaDetay", "Doctor", new { id = ViewBag.Hasta["HastaID"] })" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Hasta Detayına Geri Dön</a>
+        </div>
+    </main>
+</body>
+</html>

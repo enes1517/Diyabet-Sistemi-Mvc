@@ -1,0 +1,106 @@
+﻿@model Proje3.Models.HastaBelirtileri
+@{
+    ViewData["Title"] = "Belirti Ekle";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Diyabet Takip Sistemi</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .error-message, .success-message {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="@Url.Action("HastaDashboard", "Home")">Diyabet Takip Sistemi</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("HastaDashboard", "Home")">Ana Sayfa</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("AddBelirti", "Home")">Belirti Ekle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("AddKanSekeri", "Home")">Kan Şekeri Ekle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Login", "Home")">Çıkış</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Belirti Ekle</h2>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger error-message">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success success-message">@TempData["SuccessMessage"]</div>
+        }
+
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="AddBelirti" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="BelirtiID">Belirti</label>
+                        <select asp-for="BelirtiID" class="form-control">
+                            <option value="">Seçiniz</option>
+                            @foreach (var belirti in ViewBag.Belirtiler)
+                            {
+                                <option value="@belirti.BelirtiID">@belirti.BelirtiAdi</option>
+                            }
+                        </select>
+                        <span asp-validation-for="BelirtiID" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Tarih">Tarih</label>
+                        <input asp-for="Tarih" class="form-control" type="date" />
+                        <span asp-validation-for="Tarih" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Siddet">Şiddet (1-10)</label>
+                        <input asp-for="Siddet" class="form-control" type="number" min="1" max="10" />
+                        <span asp-validation-for="Siddet" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Belirti Ekle</button>
+                    <a href="@Url.Action("HastaDashboard", "Home")" class="btn btn-secondary">İptal</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

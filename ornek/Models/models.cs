@@ -352,4 +352,24 @@ namespace Proje3.Models
         public decimal? Boy { get; set; }
         public decimal? Kilo { get; set; }
     }
+    public class KullaniciViewModel
+    {
+        public string Ad { get; set; }
+        public string Soyad { get; set; }
+        public string Email { get; set; }
+        public byte[] ProfilResim { get; set; }
+        public bool HasProfilResim => ProfilResim != null;
+    }
+
+    public class PatientProfileViewModel
+    {
+        public string Ad { get; set; }
+        public string Soyad { get; set; }
+        public string Email { get; set; }
+        public byte[] ProfilResim { get; set; }
+        public decimal? Boy { get; set; }
+        public decimal? Kilo { get; set; }
+        public bool HasProfilResim => ProfilResim != null;
+    }
+
 }

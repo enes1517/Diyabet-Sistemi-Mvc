@@ -1,6 +1,8 @@
-﻿@model dynamic
+﻿<!-- Login.cshtml -->
+@model dynamic
 @{
     ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container mt-5">
@@ -13,11 +15,11 @@
 
     <form asp-action="Login" asp-controller="Account" method="post">
         <div class="form-group mb-3">
-            <label for="tc">TC Kimlik No</label>
-            <input type="text" class="form-control" id="tc" name="tc" required />
+            <label class="form-label" for="tc">TC Kimlik No</label>
+            <input type="text" class="form-control" id="tc" name="tc" pattern="[0-9]{11}" required title="TC Kimlik No 11 haneli olmalıdır." />
         </div>
         <div class="form-group mb-3">
-            <label for="sifre">Şifre</label>
+            <label class="form-label" for="sifre">Şifre</label>
             <input type="password" class="form-control" id="sifre" name="sifre" required />
         </div>
         <button type="submit" class="btn btn-primary">Giriş Yap</button>

@@ -1,56 +1,74 @@
 ﻿@using System.Data
 @model dynamic
 @{
-    ViewData["Title"] = "Kan Şekeri Ekle";
+    ViewData["Title"] = "Kan Şekeri Ekle"; Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-5">
-    <h2>Kan Şekeri Ekle</h2>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-    }
+<div class="alert alert-info">
+    <strong>Bilgi:</strong> Tüm ölçümler kaydedilir. Ancak sadece şu saatlerde yapılan ölçümler günlük ortalamaya dahil edilir: 07:00-08:00, 13:00-14:00, 15:00-16:00, 18:00-19:00, 22:00-23:00. Diğer saatlerde yapılan ölçümler için uyarı oluşturulur ve ortalamaya dahil edilmez. Günde en az 3 ölçüm yapmalısınız. Kritik seviyeler (<70 mg /dL veya>200 mg/dL) doktorunuza otomatik uyarı gönderilir.
+</div>
 
-    <form asp-action="KanSekeriEkle" method="post">
-        <div class="form-group mb-3">
-            <label for="olcumDegeri">Ölçüm Değeri (mg/dL)</label>
-            <input type="number" step="0.1" class="form-control" id="olcumDegeri" name="olcumDegeri" required />
-        </div>
-        <div class="form-group mb-3">
-            <label for="olcumTarihi">Ölçüm Tarihi</label>
-            <input type="date" class="form-control" id="olcumTarihi" name="olcumTarihi" required />
-        </div>
-        <div class="form-group mb-3">
-            <label for="olcumSaati">Ölçüm Saati</label>
-            <input type="time" class="form-control" id="olcumSaati" name="olcumSaati" required />
-        </div>
-        <div class="form-group mb-3">
-            <label for="olcumTuru">Ölçüm Türü</label>
-            <select class="form-control" id="olcumTuru" name="olcumTuru" required>
-                <option value="Açlık">Açlık</option>
-                <option value="Tokluk">Tokluk</option>
-            </select>
-        </div>
-        <div class="form-group mb-3">
-            <label for="belirtiId">Belirti (Opsiyonel)</label>
-            <select class="form-control" id="belirtiId" name="belirtiId">
-                <option value="">Belirti Seçiniz</option>
-                @foreach (DataRow row in ViewBag.Belirtiler.Rows)
+<form asp-action="KanSekeriEkle" method="post">
+    <div class="form-group mb-3">
+        <label class="form-label" for="olcumDegeri">Ölçüm Değeri (mg/dL)</label>
+        <input type="number" step="0.1" class="form-control" id="olcumDegeri" name="olcumDegeri" min="0" required />
+    </div>
+    <div class="form-group mb-3">
+        <label class="form-label" for="olcumTarihi">Ölçüm Tarihi</label>
+        <input type="date" class="form-control" id="olcumTarihi" name="olcumTarihi" max="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="form-group mb-3">
+        <label class="form-label" for="olcumSaati">Ölçüm Saati</label>
+        <input type="time" class="form-control" id="olcumSaati" name="olcumSaati" required />
+    </div>
+    <div class="form-group mb-3">
+        <label class="form-label" for="olcumTuru">Ölçüm Türü</label>
+        <select class="form-control" id="olcumTuru" name="olcumTuru" required>
+            <option value="Açlık">Açlık</option>
+            <option value="Tokluk">Tokluk</option>
+        </select>
+    </div>
+    <div class="form-group mb-3">
+        <label class="form-label" for="belirtiId">Belirti (Opsiyonel)</label>
+        <select class="form-control" id="belirtiId" name="belirtiId">
+            <option value="">Belirti Seçiniz</option>
+            @if (ViewBag.Belirtiler != null && ViewBag.Belirtiler.Rows.Count > 0)
+            {
+                foreach (DataRow row in ViewBag.Belirtiler.Rows)
                 {
                     <option value="@row["BelirtiID"]">@row["BelirtiAdi"]</option>
                 }
-            </select>
+            }
+        </select>
+    </div>
+    <div class="form-group mb-3">
+        <label class="form-label" for="siddet">Belirti Şiddeti (Opsiyonel, 1-10)</label>
+        <input type="number" min="1" max="10" class="form-control" id="siddet" name="siddet" />
+    </div>
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-secondary">Geri</a>
+</form>
+
+@if (ViewBag.Uyarilar != null && ViewBag.Uyarilar.Rows.Count > 0)
+{
+    <div class="mt-4">
+        <h4>Uyarılar</h4>
+        <div class="list-group">
+            @foreach (DataRow row in ViewBag.Uyarilar.Rows)
+            {
+                <div class="list-group-item list-group-item-warning">
+                    <strong>@row["UyariTuru"]:</strong> @row["UyariMesaji"] (<small>@Convert.ToDateTime(row["UyariTarihi"]).ToString("dd.MM.yyyy HH:mm")</small>)
+                </div>
+            }
         </div>
-        <div class="form-group mb-3">
-            <label for="siddet">Belirti Şiddeti (Opsiyonel, 1-10)</label>
-            <input type="number" min="1" max="10" class="form-control" id="siddet" name="siddet" />
-        </div>
-        <button type="submit" class="btn btn-primary">Kaydet</button>
-        <a asp-action="Index" class="btn btn-secondary">Geri</a>
-    </form>
-</div>
+    </div>
+}

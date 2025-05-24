@@ -1,24 +1,65 @@
-﻿<!-- HastaDetay.cshtml -->
-@{
-    ViewData["Title"] = "Hasta Detayları";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@{
+    ViewData["Title"] = "Hasta Detayları"; Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="container mt-4">
-    <h2>Hasta Detayları</h2>
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-    }
+<!-- Hasta Bilgileri -->
+<div class="card mb-4">
+    <div class="card-header">Hasta Bilgileri</div>
+    <div class="card-body">
+        @if (ViewBag.Hasta != null)
+        {
+            var hasta = ViewBag.Hasta;
+            <p><strong>Ad Soyad:</strong> @hasta["Ad"] @hasta["Soyad"]</p>
+            <p><strong>TC:</strong> @hasta["TC"]</p>
+            <p><strong>E-posta:</strong> @hasta["Email"]</p>
+            <p><strong>Doğum Tarihi:</strong> @Convert.ToDateTime(hasta["DogumTarihi"]).ToString("dd.MM.yyyy")</p>
+            <p><strong>Cinsiyet:</strong> @hasta["Cinsiyet"]</p>
+            <p><strong>Boy:</strong> @hasta["Boy"] cm</p>
+            <p><strong>Kilo:</strong> @hasta["Kilo"] kg</p>
+            @if (!DBNull.Value.Equals(hasta["ProfilResim"]))
+            {
+                <img src="data:image/jpeg;base64,@Convert.ToBase64String((byte[])hasta["ProfilResim"])" alt="Profil Resmi" class="img-thumbnail" style="max-width: 100px;" />
+            }
+        }
+        else
+        {
+            <p class="text-danger">Hasta bilgileri yüklenemedi.</p>
+        }
+    </div>
+</div>
 
-    <!-- Recent Patient Activity -->
-    <div class="card mb-4">
-        <div class="card-header">Son Hasta Aktiviteleri</div>
-        <div class="card-body">
-            <h5>Son Kan Şekeri Ölçümleri</h5>
+<!-- Hasta Veri Girişi -->
+<div class="card mb-4">
+    <div class="card-header">Kan Şekeri ve Belirti Girişi</div>
+    <div class="card-body">
+        <form asp-action="HastaDetay" method="post">
+            <input type="hidden" name="id" value="@ViewBag.Hasta["HastaID"]" />
+            <div class="form-group mb-3">
+                <label class="form-label">Kan Şekeri Değeri (mg/dL)</label>
+                <input type="number" step="0.1" name="olcumDegeri" class="form-control" required>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Belirtiler (Çoklu seçim)</label>
+                <select name="belirtiler" class="form-control" multiple>
+                    <option value="Nöropati">Nöropati</option>
+                    <option value="Polifaji">Polifaji</option>
+                    <option value="Yorgunluk">Yorgunluk</option>
+                    <option value="Polidipsi">Polidipsi</option>
+                    <option value="Bulanık Görme">Bulanık Görme</option>
+                    <option value="Yaraların Yavaş İyileşmesi">Yaraların Yavaş İyileşmesi</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Gönder</button>
+        </form>
+    </div>
+</div>
+
+<!-- Recent Patient Activity -->
+<div class="card mb-4">
+    <div class="card-header">Son Hasta Aktiviteleri</div>
+    <div class="card-body">
+        <h5>Son Kan Şekeri Ölçümleri</h5>
+        @if (ViewBag.KanSekeri != null && ViewBag.KanSekeri.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -29,22 +70,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.RecentKanSekeri != null)
-                    {
-                        foreach (System.Data.DataRow olcum in ViewBag.RecentKanSekeri.Rows)
+                    @{
+                        int kanSekeriCount = 0;
+                        foreach (System.Data.DataRow olcum in ViewBag.KanSekeri.Rows)
                         {
+                            if (kanSekeriCount >= 5) { break; }
                             <tr>
                                 <td>@olcum["OlcumDegeri"]</td>
                                 <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
                                 <td>@olcum["OlcumSaati"]</td>
                                 <td>@olcum["OlcumTuru"]</td>
                             </tr>
+                            kanSekeriCount++;
                         }
                     }
                 </tbody>
             </table>
+        }
+        else
+        {
+            <p>Son kan şekeri ölçümü bulunmamaktadır.</p>
+        }
 
-            <h5>Son Belirtiler</h5>
+        <h5>Son Belirtiler</h5>
+        @if (ViewBag.Belirtiler != null && ViewBag.Belirtiler.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -54,21 +104,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.RecentBelirtiler != null)
-                    {
-                        foreach (System.Data.DataRow belirti in ViewBag.RecentBelirtiler.Rows)
+                    @{
+                        int belirtiCount = 0;
+                        foreach (System.Data.DataRow belirti in ViewBag.Belirtiler.Rows)
                         {
+                            if (belirtiCount >= 5) { break; }
                             <tr>
                                 <td>@belirti["BelirtiAdi"]</td>
                                 <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
                                 <td>@belirti["Siddet"]</td>
                             </tr>
+                            belirtiCount++;
                         }
                     }
                 </tbody>
             </table>
+        }
+        else
+        {
+            <p>Son belirti kaydı bulunmamaktadır.</p>
+        }
 
-            <h5>Son Diyet Güncellemeleri</h5>
+        <h5>Son Diyet Güncellemeleri</h5>
+        @if (ViewBag.Diyet != null && ViewBag.Diyet.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -78,21 +137,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.RecentDiyet != null)
-                    {
-                        foreach (System.Data.DataRow diyet in ViewBag.RecentDiyet.Rows)
+                    @{
+                        int diyetCount = 0;
+                        foreach (System.Data.DataRow diyet in ViewBag.Diyet.Rows)
                         {
+                            if (diyetCount >= 5) { break; }
                             <tr>
                                 <td>@diyet["TurAdi"]</td>
                                 <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
                                 <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
                             </tr>
+                            diyetCount++;
                         }
                     }
                 </tbody>
             </table>
+        }
+        else
+        {
+            <p>Son diyet kaydı bulunmamaktadır.</p>
+        }
 
-            <h5>Son Egzersiz Güncellemeleri</h5>
+        <h5>Son Egzersiz Güncellemeleri</h5>
+        @if (ViewBag.Egzersiz != null && ViewBag.Egzersiz.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -102,48 +170,36 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.RecentEgzersiz != null)
-                    {
-                        foreach (System.Data.DataRow egzersiz in ViewBag.RecentEgzersiz.Rows)
+                    @{
+                        int egzersizCount = 0;
+                        foreach (System.Data.DataRow egzersiz in ViewBag.Egzersiz.Rows)
                         {
+                            if (egzersizCount >= 5) { break; }
                             <tr>
                                 <td>@egzersiz["TurAdi"]</td>
                                 <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
                                 <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
                             </tr>
+                            egzersizCount++;
                         }
                     }
                 </tbody>
             </table>
-        </div>
+        }
+        else
+        {
+            <p>Son egzersiz kaydı bulunmamaktadır.</p>
+        }
     </div>
+</div>
 
-    <!-- Hasta Bilgileri -->
-    <div class="card mb-4">
-        <div class="card-header">Hasta Bilgileri</div>
-        <div class="card-body">
-            @if (ViewBag.Hasta != null)
-            {
-                var hasta = ViewBag.Hasta;
-                <p><strong>Ad Soyad:</strong> @hasta["Ad"] @hasta["Soyad"]</p>
-                <p><strong>TC:</strong> @hasta["TC"]</p>
-                <p><strong>E-posta:</strong> @hasta["Email"]</p>
-                <p><strong>Doğum Tarihi:</strong> @Convert.ToDateTime(hasta["DogumTarihi"]).ToString("dd.MM.yyyy")</p>
-                <p><strong>Cinsiyet:</strong> @hasta["Cinsiyet"]</p>
-                <p><strong>Boy:</strong> @hasta["Boy"] cm</p>
-                <p><strong>Kilo:</strong> @hasta["Kilo"] kg</p>
-                @if (hasta["ProfilResim"] != DBNull.Value)
-                {
-                    <img src="data:image/jpeg;base64,@Convert.ToBase64String((byte[])hasta["ProfilResim"])" alt="Profil Resmi" class="img-thumbnail" style="max-width: 100px;" />
-                }
-            }
-        </div>
-    </div>
 
-    <!-- Kan Şekeri Ölçümleri -->
-    <div class="card mb-4">
-        <div class="card-header">Kan Şekeri Ölçümleri</div>
-        <div class="card-body">
+<!-- Kan Şekeri Ölçümleri -->
+<div class="card mb-4">
+    <div class="card-header">Kan Şekeri Ölçümleri</div>
+    <div class="card-body">
+        @if (ViewBag.KanSekeri != null && ViewBag.KanSekeri.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -155,28 +211,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.KanSekeri != null)
+                    @foreach (System.Data.DataRow olcum in ViewBag.KanSekeri.Rows)
                     {
-                        foreach (System.Data.DataRow olcum in ViewBag.KanSekeri.Rows)
-                        {
-                            <tr>
-                                <td>@olcum["OlcumDegeri"]</td>
-                                <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
-                                <td>@olcum["OlcumSaati"]</td>
-                                <td>@olcum["OlcumTuru"]</td>
-                                <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy HH:mm")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@olcum["OlcumDegeri"]</td>
+                            <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
+                            <td>@olcum["OlcumSaati"]</td>
+                            <td>@olcum["OlcumTuru"]</td>
+                            <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy ")</td>
+                        </tr>
                     }
                 </tbody>
             </table>
-        </div>
+        }
+        else
+        {
+            <p>Kan şekeri ölçümü bulunmamaktadır.</p>
+        }
     </div>
+</div>
 
-    <!-- Belirtiler -->
-    <div class="card mb-4">
-        <div class="card-header">Belirtiler</div>
-        <div class="card-body">
+<!-- Belirtiler -->
+<div class="card mb-4">
+    <div class="card-header">Belirtiler</div>
+    <div class="card-body">
+        @if (ViewBag.Belirtiler != null && ViewBag.Belirtiler.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -187,27 +247,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Belirtiler != null)
+                    @foreach (System.Data.DataRow belirti in ViewBag.Belirtiler.Rows)
                     {
-                        foreach (System.Data.DataRow belirti in ViewBag.Belirtiler.Rows)
-                        {
-                            <tr>
-                                <td>@belirti["BelirtiAdi"]</td>
-                                <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
-                                <td>@belirti["Siddet"]</td>
-                                <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@belirti["BelirtiAdi"]</td>
+                            <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
+                            <td>@belirti["Siddet"]</td>
+                            <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                        </tr>
                     }
                 </tbody>
             </table>
-        </div>
+        }
+        else
+        {
+            <p>Belirti kaydı bulunmamaktadır.</p>
+        }
     </div>
+</div>
 
-    <!-- İnsülin Uygulamaları -->
-    <div class="card mb-4">
-        <div class="card-header">İnsülin Uygulamaları</div>
-        <div class="card-body">
+<!-- İnsülin Uygulamaları -->
+<div class="card mb-4">
+    <div class="card-header">İnsülin Uygulamaları</div>
+    <div class="card-body">
+        @if (ViewBag.Insulin != null && ViewBag.Insulin.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -218,27 +282,59 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Insulin != null)
+                    @foreach (System.Data.DataRow insulin in ViewBag.Insulin.Rows)
                     {
-                        foreach (System.Data.DataRow insulin in ViewBag.Insulin.Rows)
-                        {
-                            <tr>
-                                <td>@insulin["Doz"]</td>
-                                <td>@Convert.ToDateTime(insulin["UygulamaTarihi"]).ToString("dd.MM.yyyy")</td>
-                                <td>@insulin["UygulamaSaati"]</td>
-                                <td>@insulin["OrtalamaKanSekeri"]</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@insulin["Doz"]</td>
+                            <td>@Convert.ToDateTime(insulin["UygulamaTarihi"]).ToString("dd.MM.yyyy")</td>
+                            <td>@insulin["UygulamaSaati"]</td>
+                            <td>@insulin["OrtalamaKanSekeri"]</td>
+                        </tr>
                     }
                 </tbody>
             </table>
-        </div>
+        }
+        else
+        {
+            <p>İnsülin kaydı bulunmamaktadır.</p>
+        }
     </div>
+</div>
 
-    <!-- Diyet Takibi -->
-    <div class="card mb-4">
-        <div class="card-header">Diyet Takibi</div>
-        <div class="card-body">
+<!-- Insulin Önerisi Gönderme -->
+<div class="card mt-4">
+    <div class="card-header">Insulin Önerisi</div>
+    <div class="card-body">
+        @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
+        {
+            var insulinOnerisi = ViewBag.Oneriler.Rows[ViewBag.Oneriler.Rows.Count - 1]["InsulinOnerisi"].ToString();
+            if (!string.IsNullOrEmpty(insulinOnerisi) && insulinOnerisi != "Bulunamadı" && insulinOnerisi != "Yok (Hipoglisemi)" && insulinOnerisi != "Yok (Normal)")
+            {
+                <p><strong>Önerilen Insulin Dozu:</strong> @insulinOnerisi</p>
+                <form asp-action="HastaDetay" method="post">
+                    <input type="hidden" name="id" value="@ViewBag.Hasta["HastaID"]" />
+                    <input type="hidden" name="sendInsulinSuggestion" value="true" />
+                    <button type="submit" class="btn btn-success">Öneriyi Hastaya Gönder</button>
+                </form>
+            }
+            else
+            {
+                <p>Insulin önerisi mevcut değil veya uygulanabilir değil.</p>
+            }
+        }
+        else
+        {
+            <p>Insulin önerisi için kan şekeri ve belirti verileri gerekli.</p>
+        }
+    </div>
+</div>
+
+<!-- Diyet Takibi -->
+<div class="card mb-4">
+    <div class="card-header">Diyet Takibi</div>
+    <div class="card-body">
+        @if (ViewBag.Diyet != null && ViewBag.Diyet.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -249,28 +345,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Diyet != null)
+                    @foreach (System.Data.DataRow diyet in ViewBag.Diyet.Rows)
                     {
-                        foreach (System.Data.DataRow diyet in ViewBag.Diyet.Rows)
-                        {
-                            <tr>
-                                <td>@diyet["TurAdi"]</td>
-                                <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
-                                <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
-                                <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@diyet["TurAdi"]</td>
+                            <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
+                            <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
+                            <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                        </tr>
                     }
                 </tbody>
             </table>
-            <a href="@Url.Action("DiyetOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Diyet Planı Oluştur</a>
-        </div>
+        }
+        else
+        {
+            <p>Diyet kaydı bulunmamaktadır.</p>
+        }
+        <a href="@Url.Action("DiyetOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Diyet Planı Oluştur</a>
     </div>
+</div>
 
-    <!-- Egzersiz Takibi -->
-    <div class="card mb-4">
-        <div class="card-header">Egzersiz Takibi</div>
-        <div class="card-body">
+<!-- Egzersiz Takibi -->
+<div class="card mb-4">
+    <div class="card-header">Egzersiz Takibi</div>
+    <div class="card-body">
+        @if (ViewBag.Egzersiz != null && ViewBag.Egzersiz.Rows.Count > 0)
+        {
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -281,45 +381,253 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Egzersiz != null)
+                    @foreach (System.Data.DataRow egzersiz in ViewBag.Egzersiz.Rows)
                     {
-                        foreach (System.Data.DataRow egzersiz in ViewBag.Egzersiz.Rows)
-                        {
-                            <tr>
-                                <td>@egzersiz["TurAdi"]</td>
-                                <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
-                                <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
-                                <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy HH:mm")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@egzersiz["TurAdi"]</td>
+                            <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
+                            <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
+                            <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                        </tr>
                     }
                 </tbody>
             </table>
-            <a href="@Url.Action("EgzersizOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Egzersiz Planı Oluştur</a>
-        </div>
-    </div>
-
-    <!-- Uyarı Oluştur -->
-    <div class="card">
-        <div class="card-header">Yeni Uyarı Oluştur</div>
-        <div class="card-body">
-            <form asp-action="UyariOlustur" method="post">
-                <input type="hidden" name="hastaId" value="@ViewBag.Hasta["HastaID"]" />
-                <div class="form-group">
-                    <label>Uyarı Türü</label>
-                    <select name="uyariTuru" class="form-control" required>
-                        <option value="Acil Uyarı">Acil Uyarı</option>
-                        <option value="Takip Uyarısı">Takip Uyarısı</option>
-                        <option value="Ölçüm Eksik Uyarısı">Ölçüm Eksik Uyarısı</option>
-                        <option value="Ölçüm Yetersiz Uyarısı">Ölçüm Yetersiz Uyarısı</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Uyarı Mesajı</label>
-                    <textarea name="uyariMesaji" class="form-control" rows="4" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-success">Uyarı Gönder</button>
-            </form>
-        </div>
+        }
+        else
+        {
+            <p>Egzersiz kaydı bulunmamaktadır.</p>
+        }
+        <a href="@Url.Action("EgzersizOlustur", "Doctor", new { hastaId = ViewBag.Hasta["HastaID"] })" class="btn btn-primary">Egzersiz Planı Oluştur</a>
     </div>
 </div>
+
+<!-- Uyarı Oluştur -->
+<div class="card">
+    <div class="card-header">Yeni Uyarı Oluştur</div>
+    <div class="card-body">
+        <form asp-action="UyariOlustur" method="post">
+            <input type="hidden" name="hastaId" value="@ViewBag.Hasta["HastaID"]" />
+            <div class="form-group mb-3">
+                <label class="form-label">Uyarı Türü</label>
+                <select name="uyariTuru" class="form-control" required>
+                    <option value="Acil Uyarı">Acil Uyarı</option>
+                    <option value="Takip Uyarısı">Takip Uyarısı</option>
+                    <option value="Ölçüm Eksik Uyarısı">Ölçüm Eksik Uyarısı</option>
+                    <option value="Ölçüm Yetersiz Uyarısı">Ölçüm Yetersiz Uyarısı</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Uyarı Mesajı</label>
+                <textarea name="uyariMesaji" class="form-control" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Uyarı Gönder</button>
+        </form>
+    </div>
+</div>
+
+<!-- Diyet & Egzersiz Önerileri -->
+<div class="card mt-4">
+    <div class="card-header">Diyet ve Egzersiz Önerileri</div>
+    <div class="card-body">
+        @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Kan Şekeri Seviyesi</th>
+                        <th>Belirtiler</th>
+                        <th>Diyet</th>
+                        <th>Egzersiz</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (System.Data.DataRow oneri in ViewBag.Oneriler.Rows)
+                    {
+                        <tr>
+                            <td>@oneri["KanSekeriSeviyesi"]</td>
+                            <td>@oneri["Belirtiler"]</td>
+                            <td>@oneri["Diyet"]</td>
+                            <td>@oneri["Egzersiz"]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>Öneri bulunmamaktadır. Lütfen kan şekeri ve belirti giriniz.</p>
+        }
+    </div>
+</div>
+
+<!-- Kan Şekeri Diyet ve Egzersiz Grafiği -->
+<div class="card mt-4">
+    <div class="card-header">Kan Şekeri Seviyesine Göre Diyet ve Egzersiz Önerileri</div>
+    <div class="card-body">
+        @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
+        {
+            <canvas id="bloodSugarChart" style="max-height: 400px;"></canvas>
+            <div id="recommendationsList" class="mt-4">
+                <h5>Öneri Detayları</h5>
+                <!-- Recommendations will be populated by JavaScript -->
+            </div>
+        }
+        else
+        {
+            <p>Öneri bulunmamaktadır. Lütfen kan şekeri ve belirti giriniz.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        // Data from ViewBag.Oneriler
+        const onerilerData = [
+        @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
+        {
+            var isFirst = true;
+            foreach (System.Data.DataRow oneri in ViewBag.Oneriler.Rows)
+            {
+                var kanSekeri = oneri["KanSekeriSeviyesi"].ToString();
+                var diyet = oneri["Diyet"].ToString();
+                var egzersiz = oneri["Egzersiz"].ToString();
+                if (!isFirst)
+                {
+                    @:","
+                }
+                isFirst = false;
+                <text>
+                        {
+                            kanSekeri: '@kanSekeri',
+                        diyet: '@diyet',
+                        egzersiz: '@egzersiz'
+                                        }
+                </text>
+            }
+        }
+                ];
+
+        // Function to parse KanSekeriSeviyesi and return a representative value
+        function parseBloodSugarValue(kanSekeri) {
+            // Handle range formats like "70-110 mg/dL (Ortalama)"
+            if (kanSekeri.includes('-')) {
+                const rangeMatch = kanSekeri.match(/(\d+)-(\d+)/);
+                if (rangeMatch) {
+                    const min = parseFloat(rangeMatch[1]);
+                    const max = parseFloat(rangeMatch[2]);
+                    return (min + max) / 2; // Use midpoint of range
+                }
+            }
+            // Handle single values like "120 mg/dL"
+            const singleMatch = kanSekeri.match(/(\d+\.?\d*)/);
+            return singleMatch ? parseFloat(singleMatch[0]) : 0;
+        }
+
+        // Categorize blood sugar levels into ranges
+        const ranges = [
+            { label: "<70 mg/dL", min: -Infinity, max: 70 },
+            { label: "70-110 mg/dL", min: 70, max: 110 },
+            { label: "111-150 mg/dL", min: 111, max: 150 },
+            { label: "151-200 mg/dL", min: 151, max: 200 },
+            { label: ">200 mg/dL", min: 201, max: Infinity }
+        ];
+
+        // Count diet and exercise recommendations and collect unique recommendations
+        const dietCounts = new Array(ranges.length).fill(0);
+        const exerciseCounts = new Array(ranges.length).fill(0);
+        const recommendations = ranges.map(() => ({ diets: new Set(), exercises: new Set() }));
+
+        onerilerData.forEach(item => {
+            const value = parseBloodSugarValue(item.kanSekeri);
+            for (let i = 0; i < ranges.length; i++) {
+                if (value >= ranges[i].min && value <= ranges[i].max) {
+                    if (item.diyet && item.diyet !== "Bulunamadı" && item.diyet !== "Ortalama değer için diyet önerisi mevcut değil") {
+                        dietCounts[i]++;
+                        recommendations[i].diets.add(item.diyet);
+                    }
+                    if (item.egzersiz && item.egzersiz !== "Bulunamadı" && item.egzersiz !== "Ortalama değer için egzersiz önerisi mevcut değil") {
+                        exerciseCounts[i]++;
+                        recommendations[i].exercises.add(item.egzersiz);
+                    }
+                    break;
+                }
+            }
+        });
+
+        // Chart.js configuration
+        const ctx = document.getElementById('bloodSugarChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ranges.map(r => r.label),
+                    datasets: [
+                        {
+                            label: 'Diyet Önerileri',
+                            data: dietCounts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Egzersiz Önerileri',
+                            data: exerciseCounts,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'insülün'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Kan Şekeri Seviyesi (mg/dL)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Kan Şekeri Seviyesine Göre Diyet ve Egzersiz Önerileri'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate recommendations list
+        const recommendationsList = document.getElementById('recommendationsList');
+        if (recommendationsList) {
+            const listHtml = ranges.map((range, index) => {
+                const diets = Array.from(recommendations[index].diets).join(', ') || 'Yok';
+                const exercises = Array.from(recommendations[index].exercises).join(', ') || 'Yok';
+                return `
+                            <div class="mb-3">
+                                <strong>${range.label}</strong>
+                                <ul class="list-group">
+                                    <li class="list-group-item"><strong>Diyet:</strong> ${diets}</li>
+                                    <li class="list-group-item"><strong>Egzersiz:</strong> ${exercises}</li>
+                                </ul>
+                            </div>
+                        `;
+            }).join('');
+            recommendationsList.innerHTML = `<h5>Öneri Detayları</h5>${listHtml}`;
+        }
+    </script>
+}

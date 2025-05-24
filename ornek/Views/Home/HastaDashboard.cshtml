@@ -1,30 +1,190 @@
-﻿<!DOCTYPE html>
+﻿@model Proje3.Models.Hasta
+@{
+    ViewData["Title"] = "Hasta Paneli";
+}
+
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasta Paneli</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Diyabet Takip Sistemi</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .table {
+            background-color: #fff;
+            border-radius: 8px;
+        }
+
+            .table th, .table td {
+                vertical-align: middle;
+            }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .error-message, .success-message {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Hasta Paneli</h2>
-        <div class="mb-3">
-            <a asp-action="AddKanSekeri" class="btn btn-success">Kan Şekeri Ekle</a>
-            <a asp-action="Login" class="btn btn-danger float-end">Çıkış Yap</a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="@Url.Action("HastaDashboard", "Home")">Diyabet Takip Sistemi</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="@Url.Action("HastaDashboard", "Home")">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("AddBelirti", "Home")">Belirti Ekle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("AddKanSekeri", "Home")">Kan Şekeri Ekle</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Login", "Home")">Çıkış</a>
+                </li>
+            </ul>
         </div>
-        <h4>Profil Bilgileri</h4>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="mb-4">Hoş Geldiniz, @Model.Kullanici.Ad @Model.Kullanici.Soyad</h2>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger error-message">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success success-message">@TempData["SuccessMessage"]</div>
+        }
+
+        <!-- Patient Info -->
         <div class="card">
+            <div class="card-header">
+                <h5>Profil Bilgileri</h5>
+            </div>
             <div class="card-body">
-                <p><strong>Ad:</strong> @Model.Kullanici.Ad</p>
-                <p><strong>Soyad:</strong> @Model.Kullanici.Soyad</p>
                 <p><strong>E-posta:</strong> @Model.Kullanici.Email</p>
-                <p><strong>Boy:</strong> @(Model.Boy?.ToString("F0") ?? "-") cm</p>
-                <p><strong>Kilo:</strong> @(Model.Kilo?.ToString("F0") ?? "-") kg</p>
+                <p><strong>Boy:</strong> @(Model.Boy?.ToString("0.00") ?? "-") cm</p>
+                <p><strong>Kilo:</strong> @(Model.Kilo?.ToString("0.00") ?? "-") kg</p>
             </div>
         </div>
-        <!-- Placeholder for kan şekeri grafiği, diyet/egzersiz takibi -->
+
+        <!-- Diet Plans -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Diyet Planları</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var diyetler = ViewBag.Diyetler;
+                }
+                @if (diyetler != null && diyetler.Count > 0)
+                {
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Diyet Türü</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var diyet in diyetler)
+                            {
+                                <tr>
+                                    <td>@diyet.Tarih.ToString("dd.MM.yyyy")</td>
+                                    <td>@diyet.TurAdi</td>
+                                    <td>@(diyet.UygulandiMi ? "Uygulandı" : "Uygulanmadı")</td>
+                                    <td>
+                                        <form asp-action="UpdateDiyetDurumu" method="post" class="d-inline">
+                                            <input type="hidden" name="diyetID" value="@diyet.DiyetID" />
+                                            <div class="form-check">
+                                                <input type="checkbox" name="uygulandiMi" class="form-check-input" @(diyet.UygulandiMi ? "checked" : "") onchange="this.form.submit()" />
+                                                <label class="form-check-label">Uygulandı</label>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>Henüz diyet planı bulunmamaktadır.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Exercise Plans -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Egzersiz Planları</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var egzersizler = ViewBag.Egzersizler;
+                }
+                @if (egzersizler != null && egzersizler.Count > 0)
+                {
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Egzersiz Türü</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var egzersiz in egzersizler)
+                            {
+                                <tr>
+                                    <td>@egzersiz.Tarih.ToString("dd.MM.yyyy")</td>
+                                    <td>@egzersiz.TurAdi</td>
+                                    <td>@(egzersiz.YapildiMi ? "Yapıldı" : "Yapılmadı")</td>
+                                    <td>
+                                        <form asp-action="UpdateEgzersizDurumu" method="post" class="d-inline">
+                                            <input type="hidden" name="egzersizID" value="@egzersiz.EgzersizID" />
+                                            <div class="form-check">
+                                                <input type="checkbox" name="yapildiMi" class="form-check-input" @(egzersiz.YapildiMi ? "checked" : "") onchange="this.form.submit()" />
+                                                <label class="form-check-label">Yapıldı</label>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>Henüz egzersiz planı bulunmamaktadır.</p>
+                }
+            </div>
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

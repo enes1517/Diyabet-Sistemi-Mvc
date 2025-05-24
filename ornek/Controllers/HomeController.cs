@@ -2,17 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Net.Mail;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Proje3.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Proje3.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog = DiyabetTakip; Integrated Security = True;";
+        private readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog =Diabetes; Integrated Security = True;";
 
         // Password hashing function
         private string HashPassword(string password)
@@ -27,6 +28,15 @@ namespace Proje3.Controllers
                 }
                 return builder.ToString();
             }
+        }
+
+        // Generate random password
+        private string GenerateRandomPassword()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         // Login GET
@@ -195,6 +205,7 @@ namespace Proje3.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
+                // Get patient info
                 string query = @"SELECT h.HastaID, h.KullaniciID, h.Boy, h.Kilo, k.Ad, k.Soyad, k.Email
                                FROM Hasta h JOIN Kullanici k ON h.KullaniciID = k.KullaniciID
                                WHERE h.KullaniciID = @KullaniciID";
@@ -221,6 +232,58 @@ namespace Proje3.Controllers
                         }
                     }
                 }
+
+                // Get diet plans
+                string diyetQuery = @"SELECT dt.DiyetID, dt.Tarih, dt.UygulandiMi, d.TurAdi
+                                    FROM DiyetTakip dt
+                                    JOIN DiyetTuru d ON dt.DiyetTuruID = d.DiyetTuruID
+                                    WHERE dt.HastaID = @HastaID
+                                    ORDER BY dt.Tarih DESC";
+                List<dynamic> diyetler = new List<dynamic>();
+                using (SqlCommand cmd = new SqlCommand(diyetQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@HastaID", hasta.HastaID);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            diyetler.Add(new
+                            {
+                                DiyetID = (int)reader["DiyetID"],
+                                Tarih = (DateTime)reader["Tarih"],
+                                UygulandiMi = (bool)reader["UygulandiMi"],
+                                TurAdi = reader["TurAdi"].ToString()
+                            });
+                        }
+                    }
+                }
+                ViewBag.Diyetler = diyetler;
+
+                // Get exercise plans
+                string egzersizQuery = @"SELECT et.EgzersizID, et.Tarih, et.YapildiMi, e.TurAdi
+                                       FROM EgzersizTakip et
+                                       JOIN EgzersizTuru e ON et.EgzersizTuruID = e.EgzersizTuruID
+                                       WHERE et.HastaID = @HastaID
+                                       ORDER BY et.Tarih DESC";
+                List<dynamic> egzersizler = new List<dynamic>();
+                using (SqlCommand cmd = new SqlCommand(egzersizQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@HastaID", hasta.HastaID);
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            egzersizler.Add(new
+                            {
+                                EgzersizID = (int)reader["EgzersizID"],
+                                Tarih = (DateTime)reader["Tarih"],
+                                YapildiMi = (bool)reader["YapildiMi"],
+                                TurAdi = reader["TurAdi"].ToString()
+                            });
+                        }
+                    }
+                }
+                ViewBag.Egzersizler = egzersizler;
             }
             return View(hasta);
         }
@@ -256,6 +319,10 @@ namespace Proje3.Controllers
                         }
                     }
 
+                    // Generate random password
+                    string generatedPassword = GenerateRandomPassword();
+                    string hashedPassword = HashPassword(generatedPassword);
+
                     // Insert Kullanici
                     string kullaniciQuery = @"INSERT INTO Kullanici (TC, Ad, Soyad, Email, Sifre, KullaniciTipi, DogumTarihi, Cinsiyet, KayitTarihi)
                                             VALUES (@TC, @Ad, @Soyad, @Email, @Sifre, @KullaniciTipi, @DogumTarihi, @Cinsiyet, @KayitTarihi);
@@ -267,7 +334,7 @@ namespace Proje3.Controllers
                         cmd.Parameters.AddWithValue("@Ad", model.Ad);
                         cmd.Parameters.AddWithValue("@Soyad", model.Soyad);
                         cmd.Parameters.AddWithValue("@Email", model.Email);
-                        cmd.Parameters.AddWithValue("@Sifre", HashPassword(model.Sifre));
+                        cmd.Parameters.AddWithValue("@Sifre", hashedPassword);
                         cmd.Parameters.AddWithValue("@KullaniciTipi", "Hasta");
                         cmd.Parameters.AddWithValue("@DogumTarihi", model.DogumTarihi);
                         cmd.Parameters.AddWithValue("@Cinsiyet", model.Cinsiyet);
@@ -302,6 +369,43 @@ namespace Proje3.Controllers
                         cmd.Parameters.AddWithValue("@HastaID", hastaID);
                         cmd.Parameters.AddWithValue("@TanimlamaTarihi", DateTime.Now);
                         cmd.ExecuteNonQuery();
+                    }
+
+                    // Send email with credentials
+                    try
+                    {
+                        var smtpClient = new SmtpClient("smtp.gmail.com")
+                        {
+                            Port = 587,
+                            Credentials = new NetworkCredential("your-email@gmail.com", "your-app-password"),
+                            EnableSsl = true,
+                        };
+
+                        var mailMessage = new MailMessage
+                        {
+                            From = new MailAddress("your-email@gmail.com"),
+                            Subject = "Diyabet Takip Sistemi - Giriþ Bilgileriniz",
+                            Body = $@"Sayýn {model.Ad} {model.Soyad},
+                            
+                            Diyabet Takip Sistemine hoþ geldiniz! Aþaðýdaki bilgilerle sisteme giriþ yapabilirsiniz:
+                            
+                            Kullanýcý Adý (T.C. Kimlik No): {model.TC}
+                            Þifre: {generatedPassword}
+                            
+                            Giriþ yaptýktan sonra þifrenizi deðiþtirmenizi öneririz.
+                            
+                            Saygýlar,
+                            Diyabet Takip Sistemi Ekibi",
+                            IsBodyHtml = false,
+                        };
+                        mailMessage.To.Add(model.Email);
+                        smtpClient.Send(mailMessage);
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", $"E-posta gönderilemedi: {ex.Message}");
+                        // Optionally, rollback the insertion if email fails
+                        return View(model);
                     }
 
                     return RedirectToAction("DoktorDashboard");
@@ -392,6 +496,156 @@ namespace Proje3.Controllers
                     }
                 }
                 return RedirectToAction("DoktorDashboard");
+            }
+            return View(model);
+        }
+
+        // Update Diet Status
+        [HttpPost]
+        public IActionResult UpdateDiyetDurumu(int diyetID, bool uygulandiMi)
+        {
+            if (HttpContext.Session.GetString("KullaniciTipREQUESTEDi") != "Hasta") return RedirectToAction("Login");
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string hastaQuery = "SELECT HastaID FROM Hasta WHERE KullaniciID = @KullaniciID";
+                int hastaID;
+                using (SqlCommand cmd = new SqlCommand(hastaQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@KullaniciID", HttpContext.Session.GetString("KullaniciID"));
+                    hastaID = (int)cmd.ExecuteScalar();
+                }
+
+                string query = @"UPDATE DiyetTakip SET UygulandiMi = @UygulandiMi 
+                               WHERE DiyetID = @DiyetID AND HastaID = @HastaID";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UygulandiMi", uygulandiMi);
+                    cmd.Parameters.AddWithValue("@DiyetID", diyetID);
+                    cmd.Parameters.AddWithValue("@HastaID", hastaID);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        return BadRequest("Diyet kaydý bulunamadý veya yetkiniz yok.");
+                    }
+                }
+            }
+            return RedirectToAction("HastaDashboard");
+        }
+
+        // Update Exercise Status
+        [HttpPost]
+        public IActionResult UpdateEgzersizDurumu(int egzersizID, bool yapildiMi)
+        {
+            if (HttpContext.Session.GetString("KullaniciTipi") != "Hasta") return RedirectToAction("Login");
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string hastaQuery = "SELECT HastaID FROM Hasta WHERE KullaniciID = @KullaniciID";
+                int hastaID;
+                using (SqlCommand cmd = new SqlCommand(hastaQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@KullaniciID", HttpContext.Session.GetString("KullaniciID"));
+                    hastaID = (int)cmd.ExecuteScalar();
+                }
+
+                string query = @"UPDATE EgzersizTakip SET YapildiMi = @YapildiMi 
+                               WHERE EgzersizID = @EgzersizID AND HastaID = @HastaID";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@YapildiMi", yapildiMi);
+                    cmd.Parameters.AddWithValue("@EgzersizID", egzersizID);
+                    cmd.Parameters.AddWithValue("@HastaID", hastaID);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        return BadRequest("Egzersiz kaydý bulunamadý veya yetkiniz yok.");
+                    }
+                }
+            }
+            return RedirectToAction("HastaDashboard");
+        }
+
+        // Add Symptom
+        [HttpGet]
+        public IActionResult AddBelirti()
+        {
+            if (HttpContext.Session.GetString("KullaniciTipi") != "Hasta") return RedirectToAction("Login");
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT BelirtiID, BelirtiAdi FROM Belirti";
+                List<Belirti> belirtiler = new List<Belirti>();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            belirtiler.Add(new Belirti
+                            {
+                                BelirtiID = (int)reader["BelirtiID"],
+                                BelirtiAdi = reader["BelirtiAdi"].ToString()
+                            });
+                        }
+                    }
+                }
+                ViewBag.Belirtiler = belirtiler;
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddBelirti(Models.HastaBelirtileri model)
+        {
+            if (HttpContext.Session.GetString("KullaniciTipi") != "Hasta") return RedirectToAction("Login");
+            if (ModelState.IsValid)
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string hastaQuery = "SELECT HastaID FROM Hasta WHERE KullaniciID = @KullaniciID";
+                    int hastaID;
+                    using (SqlCommand cmd = new SqlCommand(hastaQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@KullaniciID", HttpContext.Session.GetString("KullaniciID"));
+                        hastaID = (int)cmd.ExecuteScalar();
+                    }
+
+                    string query = @"INSERT INTO HastaBelirtileri (HastaID, BelirtiID, Tarih, Siddet)
+                                   VALUES (@HastaID, @BelirtiID, @Tarih, @Siddet)";
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@HastaID", hastaID);
+                        cmd.Parameters.AddWithValue("@BelirtiID", model.BelirtiID);
+                        cmd.Parameters.AddWithValue("@Tarih", model.Tarih);
+                        cmd.Parameters.AddWithValue("@Siddet", model.Siddet);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return RedirectToAction("HastaDashboard");
+            }
+            // Reload symptoms list if validation fails
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT BelirtiID, BelirtiAdi FROM Belirti";
+                List<Belirti> belirtiler = new List<Belirti>();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            belirtiler.Add(new Belirti
+                            {
+                                BelirtiID = (int)reader["BelirtiID"],
+                                BelirtiAdi = reader["BelirtiAdi"].ToString()
+                            });
+                        }
+                    }
+                }
+                ViewBag.Belirtiler = belirtiler;
             }
             return View(model);
         }
