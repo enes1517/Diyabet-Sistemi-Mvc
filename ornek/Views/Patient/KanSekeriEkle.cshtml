@@ -58,17 +58,3 @@
     <a asp-action="Index" class="btn btn-secondary">Geri</a>
 </form>
 
-@if (ViewBag.Uyarilar != null && ViewBag.Uyarilar.Rows.Count > 0)
-{
-    <div class="mt-4">
-        <h4>Uyarılar</h4>
-        <div class="list-group">
-            @foreach (DataRow row in ViewBag.Uyarilar.Rows)
-            {
-                <div class="list-group-item list-group-item-warning">
-                    <strong>@row["UyariTuru"]:</strong> @row["UyariMesaji"] (<small>@Convert.ToDateTime(row["UyariTarihi"]).ToString("dd.MM.yyyy HH:mm")</small>)
-                </div>
-            }
-        </div>
-    </div>
-}

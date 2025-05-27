@@ -1,6 +1,8 @@
 ﻿@{
-    ViewData["Title"] = "Hasta Detayları"; Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Hasta Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <!-- Hasta Bilgileri -->
 <div class="card mb-4">
     <div class="card-header">Hasta Bilgileri</div>
@@ -193,7 +195,6 @@
     </div>
 </div>
 
-
 <!-- Kan Şekeri Ölçümleri -->
 <div class="card mb-4">
     <div class="card-header">Kan Şekeri Ölçümleri</div>
@@ -218,7 +219,7 @@
                             <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
                             <td>@olcum["OlcumSaati"]</td>
                             <td>@olcum["OlcumTuru"]</td>
-                            <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy ")</td>
+                            <td>@Convert.ToDateTime(olcum["OlcumTarihi"]).ToString("dd.MM.yyyy")</td>
                         </tr>
                     }
                 </tbody>
@@ -253,7 +254,7 @@
                             <td>@belirti["BelirtiAdi"]</td>
                             <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
                             <td>@belirti["Siddet"]</td>
-                            <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                            <td>@Convert.ToDateTime(belirti["Tarih"]).ToString("dd.MM.yyyy")</td>
                         </tr>
                     }
                 </tbody>
@@ -351,7 +352,7 @@
                             <td>@diyet["TurAdi"]</td>
                             <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
                             <td>@(Convert.ToBoolean(diyet["UygulandiMi"]) ? "Evet" : "Hayır")</td>
-                            <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                            <td>@Convert.ToDateTime(diyet["Tarih"]).ToString("dd.MM.yyyy")</td>
                         </tr>
                     }
                 </tbody>
@@ -387,7 +388,7 @@
                             <td>@egzersiz["TurAdi"]</td>
                             <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
                             <td>@(Convert.ToBoolean(egzersiz["YapildiMi"]) ? "Evet" : "Hayır")</td>
-                            <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy ")</td>
+                            <td>@Convert.ToDateTime(egzersiz["Tarih"]).ToString("dd.MM.yyyy")</td>
                         </tr>
                     }
                 </tbody>
@@ -429,47 +430,62 @@
 <div class="card mt-4">
     <div class="card-header">Diyet ve Egzersiz Önerileri</div>
     <div class="card-body">
+        <!-- Date Filter Form -->
+        <form asp-action="HastaDetay" method="get" class="mb-4">
+            <input type="hidden" name="id" value="@ViewBag.Hasta["HastaID"]" />
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" name="startDate" class="form-control" value="@(ViewBag.StartDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" name="endDate" class="form-control" value="@(ViewBag.EndDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-4 align-self-end">
+                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                </div>
+            </div>
+        </form>
+
         @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
         {
-            <table class="table table-striped">
+            <table class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>Kan Şekeri Seviyesi</th>
                         <th>Belirtiler</th>
                         <th>Diyet</th>
                         <th>Egzersiz</th>
+                        <th>İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (System.Data.DataRow oneri in ViewBag.Oneriler.Rows)
                     {
-                        <tr>
+                        <tr class="recommendation-row" data-oneri-id="@oneri["OneriID"]"
+                            data-kan-sekeri="@oneri["KanSekeriSeviyesi"]"
+                            data-belirtiler="@oneri["Belirtiler"]"
+                            data-diyet="@oneri["Diyet"]"
+                            data-egzersiz="@oneri["Egzersiz"]">
                             <td>@oneri["KanSekeriSeviyesi"]</td>
                             <td>@oneri["Belirtiler"]</td>
                             <td>@oneri["Diyet"]</td>
                             <td>@oneri["Egzersiz"]</td>
+                            <td>
+                                <button class="btn btn-sm btn-info show-chart-btn">Grafiği Göster</button>
+                            </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        }
-        else
-        {
-            <p>Öneri bulunmamaktadır. Lütfen kan şekeri ve belirti giriniz.</p>
-        }
-    </div>
-</div>
 
-<!-- Kan Şekeri Diyet ve Egzersiz Grafiği -->
-<div class="card mt-4">
-    <div class="card-header">Kan Şekeri Seviyesine Göre Diyet ve Egzersiz Önerileri</div>
-    <div class="card-body">
-        @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
-        {
-            <canvas id="bloodSugarChart" style="max-height: 400px;"></canvas>
-            <div id="recommendationsList" class="mt-4">
-                <h5>Öneri Detayları</h5>
-                <!-- Recommendations will be populated by JavaScript -->
+            <div class="mt-4">
+                <canvas id="bloodSugarChart" style="max-height: 400px;"></canvas>
+                <div id="recommendationDetails" class="mt-4">
+                    <h5>Seçili Öneri Detayları</h5>
+                    <p id="selectedRecommendationText">Lütfen bir öneri seçin.</p>
+                </div>
             </div>
         }
         else
@@ -483,23 +499,26 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         // Data from ViewBag.Oneriler
-        const onerilerData = [
+        let onerilerData = [
         @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
         {
             var isFirst = true;
             foreach (System.Data.DataRow oneri in ViewBag.Oneriler.Rows)
             {
                 var kanSekeri = oneri["KanSekeriSeviyesi"].ToString();
+                var belirtiler = oneri["Belirtiler"].ToString();
                 var diyet = oneri["Diyet"].ToString();
                 var egzersiz = oneri["Egzersiz"].ToString();
                 if (!isFirst)
                 {
-                    @:","
+                    @:,
                 }
                 isFirst = false;
                 <text>
                         {
-                            kanSekeri: '@kanSekeri',
+                            oneriId: '@oneri["OneriID"]',
+                        kanSekeri: '@kanSekeri',
+                        belirtiler: '@belirtiler',
                         diyet: '@diyet',
                         egzersiz: '@egzersiz'
                                         }
@@ -508,23 +527,30 @@
         }
                 ];
 
-        // Function to parse KanSekeriSeviyesi and return a representative value
+        let currentChart = null;
+
+        // Function to parse KanSekeriSeviyesi and return a numeric value
         function parseBloodSugarValue(kanSekeri) {
-            // Handle range formats like "70-110 mg/dL (Ortalama)"
-            if (kanSekeri.includes('-')) {
-                const rangeMatch = kanSekeri.match(/(\d+)-(\d+)/);
-                if (rangeMatch) {
-                    const min = parseFloat(rangeMatch[1]);
-                    const max = parseFloat(rangeMatch[2]);
-                    return (min + max) / 2; // Use midpoint of range
+            try {
+                // Handle range formats like "70-110 mg/dL (Ortalama)"
+                if (kanSekeri.includes('-')) {
+                    const rangeMatch = kanSekeri.match(/(\d+)-(\d+)/);
+                    if (rangeMatch) {
+                        const min = parseFloat(rangeMatch[1]);
+                        const max = parseFloat(rangeMatch[2]);
+                        return (min + max) / 2; // Use midpoint of range
+                    }
                 }
+                // Handle single values like "120 mg/dL" or "120.50 mg/dL (Ortalama)"
+                const singleMatch = kanSekeri.match(/(\d+\.?\d*)/);
+                return singleMatch ? parseFloat(singleMatch[0]) : NaN;
+            } catch (e) {
+                console.error('Error parsing blood sugar value:', kanSekeri, e);
+                return NaN;
             }
-            // Handle single values like "120 mg/dL"
-            const singleMatch = kanSekeri.match(/(\d+\.?\d*)/);
-            return singleMatch ? parseFloat(singleMatch[0]) : 0;
         }
 
-        // Categorize blood sugar levels into ranges
+        // Define blood sugar ranges
         const ranges = [
             { label: "<70 mg/dL", min: -Infinity, max: 70 },
             { label: "70-110 mg/dL", min: 70, max: 110 },
@@ -533,101 +559,180 @@
             { label: ">200 mg/dL", min: 201, max: Infinity }
         ];
 
-        // Count diet and exercise recommendations and collect unique recommendations
-        const dietCounts = new Array(ranges.length).fill(0);
-        const exerciseCounts = new Array(ranges.length).fill(0);
-        const recommendations = ranges.map(() => ({ diets: new Set(), exercises: new Set() }));
+        // Function to update chart and details for a selected recommendation
+        function updateChartAndDetails(oneri) {
+            // Destroy existing chart if it exists
+            if (currentChart) {
+                currentChart.destroy();
+            }
 
-        onerilerData.forEach(item => {
-            const value = parseBloodSugarValue(item.kanSekeri);
+            const value = parseBloodSugarValue(oneri.kanSekeri);
+            if (isNaN(value)) {
+                console.error('Invalid blood sugar value for recommendation:', oneri);
+                return;
+            }
+
+            // Find the range for this recommendation
+            let selectedRangeIndex = -1;
             for (let i = 0; i < ranges.length; i++) {
                 if (value >= ranges[i].min && value <= ranges[i].max) {
-                    if (item.diyet && item.diyet !== "Bulunamadı" && item.diyet !== "Ortalama değer için diyet önerisi mevcut değil") {
-                        dietCounts[i]++;
-                        recommendations[i].diets.add(item.diyet);
-                    }
-                    if (item.egzersiz && item.egzersiz !== "Bulunamadı" && item.egzersiz !== "Ortalama değer için egzersiz önerisi mevcut değil") {
-                        exerciseCounts[i]++;
-                        recommendations[i].exercises.add(item.egzersiz);
-                    }
+                    selectedRangeIndex = i;
                     break;
                 }
             }
-        });
 
-        // Chart.js configuration
-        const ctx = document.getElementById('bloodSugarChart')?.getContext('2d');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ranges.map(r => r.label),
-                    datasets: [
-                        {
-                            label: 'Diyet Önerileri',
-                            data: dietCounts,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Egzersiz Önerileri',
-                            data: exerciseCounts,
-                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'insülün'
+            if (selectedRangeIndex === -1) {
+                console.error('Blood sugar value out of defined ranges:', value);
+                return;
+            }
+
+            // Prepare data for the chart
+            const dietCount = (oneri.diyet && oneri.diyet !== "Bulunamadı" || oneri.diyet !== "Ortalama değer için diyet önerisi mevcut değil") ? 1 : 0;
+            const exerciseCount = (oneri.egzersiz && oneri.egzersiz !== "Bulunamadı" || oneri.egzersiz !== "Ortalama değer için egzersiz önerisi mevcut değil") ? 1 : 0;
+            const symptoms = (oneri.belirtiler && oneri.belirtiler !== "Belirti yok" || oneri.belirtiler !== "Ortalama değer için belirtiler değerlendirilmedi") ? oneri.belirtiler.split(", ") : [];
+
+            // Update recommendation details
+            const recommendationDetails = document.getElementById('selectedRecommendationText');
+            if (recommendationDetails) {
+                recommendationDetails.innerHTML = `
+                            <strong>Kan Şekeri Seviyesi:</strong> ${oneri.kanSekeri}<br>
+                            <strong>Belirtiler:</strong> ${oneri.belirtiler || 'Yok'}<br>
+                            <strong>Diyet:</strong> ${oneri.diyet || 'Yok'}<br>
+                            <strong>Egzersiz:</strong> ${oneri.egzersiz || 'Yok'}
+                        `;
+            }
+
+            // Chart configuration
+            const ctx = document.getElementById('bloodSugarChart')?.getContext('2d');
+            if (ctx) {
+                currentChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [ranges[selectedRangeIndex].label],
+                        datasets: [
+                            {
+                                label: 'Diyet Önerisi',
+                                data: [dietCount],
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue for diet
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Egzersiz Önerisi',
+                                data: [exerciseCount],
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)', // Pink for exercise
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
                             }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Kan Şekeri Seviyesi (mg/dL)'
-                            }
-                        }
+                        ]
                     },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 1,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function (value) {
+                                        return value === 1 ? 'Var' : 'Yok';
+                                    },
+                                    color: '#333333'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Öneri Durumu',
+                                    color: '#333333'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Kan Şekeri Seviyesi (mg/dL)',
+                                    color: '#333333'
+                                },
+                                ticks: {
+                                    color: '#333333'
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
                         },
-                        title: {
-                            display: true,
-                            text: 'Kan Şekeri Seviyesine Göre Diyet ve Egzersiz Önerileri'
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#333333',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+
+                            title: {
+                                display: true,
+                                text: `Seçili Öneri: ${oneri.kanSekeri}`,
+                                color: '#333333',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        color: '#333333',
+                                        font: {
+                                            size: 14
+                                        }
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Seçili Öneri: ${oneri.kanSekeri}`,
+                                    color: '#333333',
+                                    font: {
+                                        size: 16
+                                    }
+                                },
+                                tooltip: {
+                                    enabled: false // Disable tooltips
+                                }
+                            }
                         }
                     }
-                }
-            });
+                });
+            } else {
+                console.error('Canvas element not found');
+            }
         }
 
-        // Populate recommendations list
-        const recommendationsList = document.getElementById('recommendationsList');
-        if (recommendationsList) {
-            const listHtml = ranges.map((range, index) => {
-                const diets = Array.from(recommendations[index].diets).join(', ') || 'Yok';
-                const exercises = Array.from(recommendations[index].exercises).join(', ') || 'Yok';
-                return `
-                            <div class="mb-3">
-                                <strong>${range.label}</strong>
-                                <ul class="list-group">
-                                    <li class="list-group-item"><strong>Diyet:</strong> ${diets}</li>
-                                    <li class="list-group-item"><strong>Egzersiz:</strong> ${exercises}</li>
-                                </ul>
-                            </div>
-                        `;
-            }).join('');
-            recommendationsList.innerHTML = `<h5>Öneri Detayları</h5>${listHtml}`;
+        // Event listeners for recommendation rows
+        document.querySelectorAll('.show-chart-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const row = this.closest('.recommendation-row');
+                const oneriId = row.dataset.oneriId;
+                const oneri = onerilerData.find(item => item.oneriId === oneriId);
+                if (oneri) {
+                    updateChartAndDetails(oneri);
+                    // Highlight the selected row
+                    document.querySelectorAll('.recommendation-row').forEach(r => r.classList.remove('table-active'));
+                    row.classList.add('table-active');
+                }
+            });
+        });
+
+        // Initialize with the first recommendation if available
+        if (onerilerData.length > 0) {
+            updateChartAndDetails(onerilerData[0]);
+            document.querySelector('.recommendation-row')?.classList.add('table-active');
         }
     </script>
 }

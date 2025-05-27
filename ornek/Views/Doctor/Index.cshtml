@@ -1,4 +1,5 @@
-﻿<!-- Index.cshtml -->
+﻿@using System.Data
+<!-- Index.cshtml -->
 @{
     ViewData["Title"] = "Doktor Ana Sayfa";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -57,57 +58,43 @@
     </div>
 
     <!-- Hasta Filtresi -->
-<div class="card shadow-sm mb-5">
-    <div class="card-header bg-secondary text-white">
-        <h5 class="mb-0">Hasta Filtresi</h5>
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Hasta Filtresi</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-2">
+                    <label for="adFilter" class="form-label">İsim</label>
+                    <input type="text" id="adFilter" name="adFilter" class="form-control" value="@(ViewBag.AdFilter ?? "")" placeholder="Ör: Ahmet" />
+                </div>
+                <div class="col-md-2">
+                    <label for="soyadFilter" class="form-label">Soyisim</label>
+                    <input type="text" id="soyadFilter" name="soyadFilter" class="form-control" value="@(ViewBag.SoyadFilter ?? "")" placeholder="Ör: Yılmaz" />
+                </div>
+                <div class="col-md-2">
+                    <label for="tcFilter" class="form-label">T.C. Kimlik No</label>
+                    <input type="text" id="tcFilter" name="tcFilter" class="form-control" value="@(ViewBag.TcFilter ?? "")" placeholder="Ör: 12345678901" maxlength="11" />
+                </div>
+                <div class="col-md-3">
+                    <label for="bloodSugarFilter" class="form-label">Kan Şekeri Filtresi</label>
+                    <select id="bloodSugarFilter" name="bloodSugarFilter" class="form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.BloodSugarFilter))">Tümü</option>
+                        <option value="> 180" selected="@(ViewBag.BloodSugarFilter == "> 180")">Yüksek (> 180 mg/dL)</option>
+                        <option value="< 70" selected="@(ViewBag.BloodSugarFilter == "< 70")">Düşük (< 70 mg/dL)</option>
+                        <option value="BETWEEN 70 AND 180" selected="@(ViewBag.BloodSugarFilter == "BETWEEN 70 AND 180")">Normal (70-180 mg/dL)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="symptomFilter" class="form-label">Belirti Filtresi</label>
+                    <input type="text" id="symptomFilter" name="symptomFilter" class="form-control" value="@(ViewBag.SymptomFilter ?? "")" placeholder="Ör: Yorgunluk" />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filtrele</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="card-body">
-        <form asp-action="Index" method="get" class="row g-3">
-            <div class="col-md-2">
-                <label for="adFilter" class="form-label">İsim</label>
-                <input type="text" id="adFilter" name="adFilter" class="form-control" value="@(ViewBag.AdFilter ?? "")" placeholder="Ör: Ahmet" />
-            </div>
-            <div class="col-md-2">
-                <label for="soyadFilter" class="form-label">Soyisim</label>
-                <input type="text" id="soyadFilter" name="soyadFilter" class="form-control" value="@(ViewBag.SoyadFilter ?? "")" placeholder="Ör: Yılmaz" />
-            </div>
-            <div class="col-md-2">
-                <label for="tcFilter" class="form-label">T.C. Kimlik No</label>
-                <input type="text" id="tcFilter" name="tcFilter" class="form-control" value="@(ViewBag.TcFilter ?? "")" placeholder="Ör: 12345678901" maxlength="11" />
-            </div>
-            <div class="col-md-3">
-                <label for="bloodSugarFilter" class="form-label">Kan Şekeri Filtresi</label>
-                <select id="bloodSugarFilter" name="bloodSugarFilter" class="form-select">
-                            <option value="" selected="@(string.IsNullOrEmpty(ViewBag.BloodSugarFilter))">Tümü</option>
-                            <option value="> 180" selected="@(ViewBag.BloodSugarFilter == "> 180")">Yüksek (> 180 mg/dL)</option>
-                            <option value="< 70" selected="@(ViewBag.BloodSugarFilter == "< 70")">Düşük (< 70 mg/dL)</option>
-                            <option value="BETWEEN 70 AND 180" selected="@(ViewBag.BloodSugarFilter == "BETWEEN 70 AND 180")">Normal (70-180 mg/dL)</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="symptomFilter" class="form-label">Belirti Filtresi</label>
-                <input type="text" id="symptomFilter" name="symptomFilter" class="form-control" value="@(ViewBag.SymptomFilter ?? "")" placeholder="Ör: Yorgunluk" />
-            </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Filtrele</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 
     <!-- Hastalar Listesi -->
     <div class="card shadow-sm mb-5">
@@ -161,53 +148,81 @@
     <!-- Uyarılar -->
     <div class="card shadow-sm">
         <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Okunmamış Uyarılar</h5>
+            <h5 class="mb-0">Uyarılar</h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Hasta</th>
-                            <th>Uyarı Türü</th>
-                            <th>Mesaj</th>
-                            <th>Tarih</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (ViewBag.Uyarilar != null && ViewBag.Uyarilar.Rows.Count > 0)
-                        {
-                            foreach (System.Data.DataRow uyari in ViewBag.Uyarilar.Rows)
+            <div class="mb-3">
+                <label for="alertFilter" class="form-label">Uyarı Durumu</label>
+                <select id="alertFilter" class="form-select w-auto d-inline-block">
+                    <option value="all">Tümü</option>
+                    <option value="unread">Okunmamış</option>
+                    <option value="read">Okunmuş</option>
+                </select>
+            </div>
+            @if (ViewBag.Uyarilar != null && ViewBag.Uyarilar.Rows.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="alertsTable">
+                        <thead>
+                            <tr>
+                                <th>Hasta</th>
+                                <th>Uyarı Türü</th>
+                                <th>Mesaj</th>
+                                <th>Tarih</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (DataRow uyari in ViewBag.Uyarilar.Rows)
                             {
-                                <tr>
+                                <tr class="@(Convert.ToBoolean(uyari["Okundu"]) ? "alert-read" : "alert-unread")">
                                     <td>@uyari["HastaAdSoyad"]</td>
                                     <td>@uyari["UyariTuru"]</td>
                                     <td>@uyari["UyariMesaji"]</td>
                                     <td>@Convert.ToDateTime(uyari["UyariTarihi"]).ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td>@(Convert.ToBoolean(uyari["Okundu"]) ? "Okundu" : "Okunmadı")</td>
+                                    <td>
+                                        @if (!Convert.ToBoolean(uyari["Okundu"]))
+                                        {
+                                            <form asp-action="MarkAlertAsRead" method="post" class="d-inline">
+                                                <input type="hidden" name="uyariId" value="@uyari["UyariID"]" />
+                                                <button type="submit" class="btn btn-sm btn-success">Okundu Yap</button>
+                                            </form>
+                                        }
+                                    </td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="4" class="text-center">Okunmamış uyarı bulunmamaktadır.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Uyarı bulunmamaktadır.</p>
+            }
         </div>
+    </div>
+</div>
 
-        @section Scripts {
-            <script>
-                // Filtreleme formu için istemci tarafı doğrulaması (isteğe bağlı)
-                document.querySelector('form').addEventListener('submit', function (e) {
-                    const symptomFilter = document.querySelector('#symptomFilter').value;
-                    if (symptomFilter.length > 50) {
-                        e.preventDefault();
-                        alert('Belirti filtresi 50 karakterden uzun olamaz.');
-                    }
-                });
-            </script>
-        }
+@section Scripts {
+    <script>
+        // Client-side filtering for alerts
+        document.getElementById('alertFilter').addEventListener('change', function () {
+            var filter = this.value;
+            var rows = document.querySelectorAll('#alertsTable tbody tr');
+
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else if (filter === 'unread' && row.classList.contains('alert-unread')) {
+                    row.style.display = '';
+                } else if (filter === 'read' && row.classList.contains('alert-read')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

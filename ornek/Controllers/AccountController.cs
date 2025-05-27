@@ -19,7 +19,6 @@ namespace ornek.Controllers
         public AccountController(IConfiguration configuration)
         {
             _configuration = configuration;
-            // Bağlantı dizesi doğrudan appsettings.json'dan alınmalı
             _connectionString = _configuration.GetConnectionString("SqlConnection");
             _baglanti = new baglanti(_connectionString);
         }
@@ -28,7 +27,6 @@ namespace ornek.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Kullanıcı zaten giriş yapmışsa, kullanıcı tipine göre yönlendir
             if (HttpContext.Session.GetString("UserType") != null)
             {
                 if (HttpContext.Session.GetString("UserType") == "Doktor")
@@ -51,11 +49,9 @@ namespace ornek.Controllers
 
                 if (_baglanti.ValidateUser(model.TC, model.Sifre, out userType, out userId))
                 {
-                    // Session'a kullanıcı bilgilerini kaydet
                     HttpContext.Session.SetInt32("UserId", userId);
                     HttpContext.Session.SetString("UserType", userType);
 
-                    // Kullanıcı tipine göre ilgili sayfaya yönlendir
                     if (userType == "Doktor")
                     {
                         DataTable dt = _baglanti.ExecuteQuery("SELECT DoktorID FROM Doktor WHERE KullaniciID = @KullaniciID",
