@@ -86,7 +86,6 @@ namespace ornek.Controllers
             return View(model);
         }
 
-        // Kayıt sayfasını gösterme
         [HttpGet]
         public IActionResult Register()
         {

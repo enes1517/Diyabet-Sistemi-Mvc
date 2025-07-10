@@ -55,7 +55,6 @@
     </div>
 </div>
 
-<!-- Recent Patient Activity -->
 <div class="card mb-4">
     <div class="card-header">Son Hasta Aktiviteleri</div>
     <div class="card-body">
@@ -430,7 +429,6 @@
 <div class="card mt-4">
     <div class="card-header">Diyet ve Egzersiz Önerileri</div>
     <div class="card-body">
-        <!-- Date Filter Form -->
         <form asp-action="HastaDetay" method="get" class="mb-4">
             <input type="hidden" name="id" value="@ViewBag.Hasta["HastaID"]" />
             <div class="row">
@@ -498,7 +496,6 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
-        // Data from ViewBag.Oneriler
         let onerilerData = [
         @if (ViewBag.Oneriler != null && ViewBag.Oneriler.Rows.Count > 0)
         {
@@ -529,19 +526,16 @@
 
         let currentChart = null;
 
-        // Function to parse KanSekeriSeviyesi and return a numeric value
         function parseBloodSugarValue(kanSekeri) {
             try {
-                // Handle range formats like "70-110 mg/dL (Ortalama)"
                 if (kanSekeri.includes('-')) {
                     const rangeMatch = kanSekeri.match(/(\d+)-(\d+)/);
                     if (rangeMatch) {
                         const min = parseFloat(rangeMatch[1]);
                         const max = parseFloat(rangeMatch[2]);
-                        return (min + max) / 2; // Use midpoint of range
+                        return (min + max) / 2; 
                     }
                 }
-                // Handle single values like "120 mg/dL" or "120.50 mg/dL (Ortalama)"
                 const singleMatch = kanSekeri.match(/(\d+\.?\d*)/);
                 return singleMatch ? parseFloat(singleMatch[0]) : NaN;
             } catch (e) {
@@ -550,7 +544,6 @@
             }
         }
 
-        // Define blood sugar ranges
         const ranges = [
             { label: "<70 mg/dL", min: -Infinity, max: 70 },
             { label: "70-110 mg/dL", min: 70, max: 110 },
@@ -559,9 +552,7 @@
             { label: ">200 mg/dL", min: 201, max: Infinity }
         ];
 
-        // Function to update chart and details for a selected recommendation
         function updateChartAndDetails(oneri) {
-            // Destroy existing chart if it exists
             if (currentChart) {
                 currentChart.destroy();
             }
@@ -572,7 +563,6 @@
                 return;
             }
 
-            // Find the range for this recommendation
             let selectedRangeIndex = -1;
             for (let i = 0; i < ranges.length; i++) {
                 if (value >= ranges[i].min && value <= ranges[i].max) {
@@ -586,12 +576,10 @@
                 return;
             }
 
-            // Prepare data for the chart
             const dietCount = (oneri.diyet && oneri.diyet !== "Bulunamadı" || oneri.diyet !== "Ortalama değer için diyet önerisi mevcut değil") ? 1 : 0;
             const exerciseCount = (oneri.egzersiz && oneri.egzersiz !== "Bulunamadı" || oneri.egzersiz !== "Ortalama değer için egzersiz önerisi mevcut değil") ? 1 : 0;
             const symptoms = (oneri.belirtiler && oneri.belirtiler !== "Belirti yok" || oneri.belirtiler !== "Ortalama değer için belirtiler değerlendirilmedi") ? oneri.belirtiler.split(", ") : [];
 
-            // Update recommendation details
             const recommendationDetails = document.getElementById('selectedRecommendationText');
             if (recommendationDetails) {
                 recommendationDetails.innerHTML = `
@@ -602,7 +590,6 @@
                         `;
             }
 
-            // Chart configuration
             const ctx = document.getElementById('bloodSugarChart')?.getContext('2d');
             if (ctx) {
                 currentChart = new Chart(ctx, {
@@ -613,14 +600,14 @@
                             {
                                 label: 'Diyet Önerisi',
                                 data: [dietCount],
-                                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue for diet
+                                backgroundColor: 'rgba(54, 162, 235, 0.6)', 
                                 borderColor: 'rgba(54, 162, 235, 1)',
                                 borderWidth: 1
                             },
                             {
                                 label: 'Egzersiz Önerisi',
                                 data: [exerciseCount],
-                                backgroundColor: 'rgba(255, 99, 132, 0.6)', // Pink for exercise
+                                backgroundColor: 'rgba(255, 99, 132, 0.6)', 
                                 borderColor: 'rgba(255, 99, 132, 1)',
                                 borderWidth: 1
                             }
@@ -703,7 +690,7 @@
                                     }
                                 },
                                 tooltip: {
-                                    enabled: false // Disable tooltips
+                                    enabled: false 
                                 }
                             }
                         }
@@ -714,7 +701,6 @@
             }
         }
 
-        // Event listeners for recommendation rows
         document.querySelectorAll('.show-chart-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const row = this.closest('.recommendation-row');
@@ -722,14 +708,12 @@
                 const oneri = onerilerData.find(item => item.oneriId === oneriId);
                 if (oneri) {
                     updateChartAndDetails(oneri);
-                    // Highlight the selected row
                     document.querySelectorAll('.recommendation-row').forEach(r => r.classList.remove('table-active'));
                     row.classList.add('table-active');
                 }
             });
         });
 
-        // Initialize with the first recommendation if available
         if (onerilerData.length > 0) {
             updateChartAndDetails(onerilerData[0]);
             document.querySelector('.recommendation-row')?.classList.add('table-active');

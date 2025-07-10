@@ -47,7 +47,6 @@ namespace Proje3.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime KayitTarihi { get; set; }
 
-        // Navigation properties
         public virtual Doktor Doktor { get; set; }
         public virtual Hasta Hasta { get; set; }
     }
@@ -59,7 +58,6 @@ namespace Proje3.Models
         public int KullaniciID { get; set; }
         public string Uzmanlik { get; set; }
 
-        // Navigation properties
         public virtual Kullanici Kullanici { get; set; }
         public virtual ICollection<HastaDr> HastaDoktorlar { get; set; }
         public virtual ICollection<Uyarilar> Uyarilar { get; set; }
@@ -88,7 +86,6 @@ namespace Proje3.Models
             }
         }
 
-        // Navigation properties
         public virtual Kullanici Kullanici { get; set; }
         public virtual ICollection<HastaDr> HastaDoktorlar { get; set; }
         public virtual ICollection<KanSekeri> KanSekeriOlcumleri { get; set; }
@@ -107,7 +104,6 @@ namespace Proje3.Models
         public int HastaID { get; set; }
         public DateTime TanimlamaTarihi { get; set; }
 
-        // Navigation properties
         public virtual Doktor Doktor { get; set; }
         public virtual Hasta Hasta { get; set; }
     }
@@ -135,7 +131,6 @@ namespace Proje3.Models
         [Required(ErrorMessage = "Ölçüm türü zorunludur.")]
         public string OlcumTuru { get; set; } // "Açlık", "Tokluk", "Gece" vb.
 
-        // Navigation property
         public virtual Hasta Hasta { get; set; }
     }
 
@@ -148,7 +143,6 @@ namespace Proje3.Models
         [StringLength(100, ErrorMessage = "Belirti adı en fazla 100 karakter olabilir.")]
         public string BelirtiAdi { get; set; }
 
-        // Navigation property
         public virtual ICollection<HastaBelirtileri> HastaBelirtileri { get; set; }
     }
 
@@ -168,7 +162,6 @@ namespace Proje3.Models
         [Range(1, 5, ErrorMessage = "Şiddet 1-5 arasında olmalıdır.")]
         public int Siddet { get; set; }
 
-        // Navigation properties
         public virtual Hasta Hasta { get; set; }
         public virtual Belirti Belirti { get; set; }
     }
@@ -185,7 +178,6 @@ namespace Proje3.Models
         [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir.")]
         public string Aciklama { get; set; }
 
-        // Navigation property
         public virtual ICollection<DiyetTakip> DiyetTakipleri { get; set; }
     }
 
@@ -201,7 +193,6 @@ namespace Proje3.Models
         [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir.")]
         public string Aciklama { get; set; }
 
-        // Navigation property
         public virtual ICollection<EgzersizTakip> EgzersizTakipleri { get; set; }
     }
 
@@ -218,7 +209,6 @@ namespace Proje3.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime Tarih { get; set; }
 
-        // Navigation properties
         public virtual Hasta Hasta { get; set; }
         public virtual DiyetTuru DiyetTuru { get; set; }
     }
@@ -236,7 +226,6 @@ namespace Proje3.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime Tarih { get; set; }
 
-        // Navigation properties
         public virtual Hasta Hasta { get; set; }
         public virtual EgzersizTuru EgzersizTuru { get; set; }
     }
@@ -265,7 +254,6 @@ namespace Proje3.Models
         [Range(0.1, 999.99, ErrorMessage = "Geçerli bir kan şekeri değeri giriniz.")]
         public decimal OrtalamaKanSekeri { get; set; }
 
-        // Navigation property
         public virtual Hasta Hasta { get; set; }
     }
 
@@ -287,7 +275,6 @@ namespace Proje3.Models
         public DateTime UyariTarihi { get; set; }
         public bool Okundu { get; set; }
 
-        // Navigation properties
         public virtual Hasta Hasta { get; set; }
         public virtual Doktor Doktor { get; set; }
     }
@@ -352,6 +339,7 @@ namespace Proje3.Models
         public decimal? Boy { get; set; }
         public decimal? Kilo { get; set; }
     }
+    // kullanıcı için
     public class KullaniciViewModel
     {
         public string Ad { get; set; }
@@ -360,7 +348,7 @@ namespace Proje3.Models
         public byte[] ProfilResim { get; set; }
         public bool HasProfilResim => ProfilResim != null;
     }
-
+    // hasta için
     public class PatientProfileViewModel
     {
         public string Ad { get; set; }

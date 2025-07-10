@@ -28,7 +28,7 @@
 
         <h2 class="text-2xl font-semibold mb-4">@ViewBag.Hasta["Ad"] @ViewBag.Hasta["Soyad"] - Arşiv</h2>
 
-        <!-- Date Range Filter -->
+        <!-- tarih aralığı filtre-->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Tarih Aralığı Filtresi</h3>
             <form asp-action="HastaArsiv" asp-controller="Doctor" method="get" class="space-y-4">
@@ -47,7 +47,7 @@
             </form>
         </section>
 
-        <!-- Compliance Percentages -->
+        <!-- oranlar -->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Uyum Oranları</h3>
             <div class="grid grid-cols-2 gap-4">
@@ -62,7 +62,7 @@
             </div>
         </section>
 
-        <!-- Blood Sugar Measurements -->
+        <!-- kan şekeri ölçümleri -->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Kan Şekeri Ölçümleri</h3>
             @if (ViewBag.KanSekeri.Rows.Count > 0)
@@ -95,7 +95,7 @@
             }
         </section>
 
-        <!-- Symptoms -->
+        <!-- semptomlar -->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Belirtiler</h3>
             @if (ViewBag.Belirtiler.Rows.Count > 0)
@@ -128,7 +128,7 @@
 
        
 
-        <!-- Diet Plans -->
+        <!-- diyet planı -->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Diyet Planları</h3>
             @if (ViewBag.Diyet.Rows.Count > 0)
@@ -159,7 +159,7 @@
             }
         </section>
 
-        <!-- Exercise Plans -->
+        <!-- egzersiz planı -->
         <section class="bg-white p-6 rounded-lg shadow mb-8">
             <h3 class="text-xl font-semibold mb-4">Egzersiz Planları</h3>
             @if (ViewBag.Egzersiz.Rows.Count > 0)
@@ -190,7 +190,6 @@
             }
         </section>
 
-        <!-- Back to Patient Detail -->
         <div class="mb-8">
             <a href="@Url.Action("HastaDetay", "Doctor", new { id = ViewBag.Hasta["HastaID"] })" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Hasta Detayına Geri Dön</a>
         </div>

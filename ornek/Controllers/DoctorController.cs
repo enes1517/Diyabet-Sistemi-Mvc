@@ -450,7 +450,6 @@ namespace ornek.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Insert new blood sugar measurement
             if (olcumDegeri.HasValue)
             {
                 string insertKanSekeriQuery = @"
@@ -467,7 +466,6 @@ namespace ornek.Controllers
                         new SqlParameter("@OlcumTuru", "Doktor Ölçümü")
                     });
 
-                // Insert symptoms
                 if (belirtiler != null && belirtiler.Length > 0)
                 {
                     foreach (var belirti in belirtiler)
@@ -495,7 +493,6 @@ namespace ornek.Controllers
                 }
             }
 
-            // Fetch updated data
             startDate = startDate ?? DateTime.Now.AddMonths(-1);
             endDate = endDate ?? DateTime.Now;
 
@@ -602,7 +599,6 @@ namespace ornek.Controllers
                     new SqlParameter("@EndDate", endDate)
                 });
 
-            // Calculate compliance percentages
             int totalDietRecords = dtDiyet.Rows.Count;
             int appliedDietRecords = dtDiyet.AsEnumerable().Count(row => Convert.ToBoolean(row["UygulandiMi"]));
             double dietCompliance = totalDietRecords > 0 ? (appliedDietRecords * 100.0 / totalDietRecords) : 0;
@@ -611,7 +607,6 @@ namespace ornek.Controllers
             int completedExerciseRecords = dtEgzersiz.AsEnumerable().Count(row => Convert.ToBoolean(row["YapildiMi"]));
             double exerciseCompliance = totalExerciseRecords > 0 ? (completedExerciseRecords * 100.0 / totalExerciseRecords) : 0;
 
-            // Prepare data for charts
             var bloodSugarData = dtKanSekeri.AsEnumerable()
                 .Select(row => new
                 {
@@ -635,12 +630,10 @@ namespace ornek.Controllers
                     Count = g.Count()
                 }).ToList();
 
-            // Ortalama kan şekeri hesaplama
             decimal averageBloodSugar = dtKanSekeri.Rows.Count > 0
                 ? dtKanSekeri.AsEnumerable().Average(row => Convert.ToDecimal(row["OlcumDegeri"]))
                 : 0;
 
-            // Tabloya göre insulin önerisi belirleme
             string insulinOnerisi = "Bulunamadı";
             decimal? insulinDoz = null;
             if (averageBloodSugar > 0)
@@ -665,8 +658,6 @@ namespace ornek.Controllers
                     insulinDoz = 3;
                 }
             }
-
-            // Insulin önerisi varsa ve doktor gönderimi onayladıysa
             if (insulinDoz.HasValue && sendInsulinSuggestion)
             {
                 string insertInsulinQuery = @"
@@ -742,7 +733,6 @@ namespace ornek.Controllers
                 TempData["SuccessMessage"] = "Insulin önerisi hastaya başarıyla gönderildi.";
             }
 
-            // Yeni ölçüm için öneriler
             if (olcumDegeri.HasValue)
             {
                 decimal olcumDegeriValue = olcumDegeri.Value;
@@ -788,7 +778,6 @@ namespace ornek.Controllers
                     insulinOnerisiYeni = olcumDegeriValue > 200 ? "3 mL (Çok Yüksek)" : "2 mL (Yüksek)";
                 }
 
-                // Insert new recommendation into Oneriler table
                 string insertOneriQuery = @"
                     INSERT INTO Oneriler (HastaID, DoktorID, KanSekeriSeviyesi, Belirtiler, Diyet, Egzersiz, InsulinOnerisi)
                     VALUES (@HastaID, @DoktorID, @KanSekeriSeviyesi, @Belirtiler, @Diyet, @Egzersiz, @InsulinOnerisi)
@@ -806,7 +795,6 @@ namespace ornek.Controllers
                     });
             }
 
-            // Fetch updated recommendations
             string oneri = @"
                 SELECT OneriID, KanSekeriSeviyesi, Belirtiler, Diyet, Egzersiz, InsulinOnerisi
                 FROM Oneriler

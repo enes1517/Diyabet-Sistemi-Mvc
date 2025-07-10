@@ -44,7 +44,6 @@ namespace ornek.Controllers
 
             try
             {
-                // Simulate a daily check
                 DateTime now = DateTime.Now;
                 if (_lastDailyCheck == null || _lastDailyCheck.Value.Date != now.Date)
                 {
@@ -52,7 +51,6 @@ namespace ornek.Controllers
                     _lastDailyCheck = now;
                 }
 
-                // User info
                 DataTable dtKullanici = _baglanti.GetUserInfo(userId);
                 if (dtKullanici.Rows.Count == 0)
                 {
@@ -62,7 +60,6 @@ namespace ornek.Controllers
                 }
                 ViewBag.Kullanici = dtKullanici.Rows[0];
 
-                // Patient info
                 string hastaQuery = @"
                 SELECT h.Boy, h.Kilo
                 FROM Hasta h
@@ -72,7 +69,6 @@ namespace ornek.Controllers
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
                 ViewBag.Hasta = dtHasta.Rows.Count > 0 ? dtHasta.Rows[0] : null;
 
-                // Blood sugar records
                 string kanSekeriQuery = @"
                 SELECT KanSekeriID, OlcumDegeri, OlcumTarihi, OlcumSaati, OlcumTuru
                 FROM KanSekeri
@@ -83,7 +79,6 @@ namespace ornek.Controllers
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
                 ViewBag.KanSekeri = dtKanSekeri;
 
-                // Warnings
                 string uyariQuery = @"
                 SELECT u.UyariID, u.UyariTuru, u.UyariMesaji, u.UyariTarihi
                 FROM Uyarilar u
@@ -94,7 +89,6 @@ namespace ornek.Controllers
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
                 ViewBag.Uyarilar = dtUyarilar;
 
-                // Calculate blood sugar average for valid time slots
                 if (dtKanSekeri.Rows.Count > 0)
                 {
                     decimal total = 0;
@@ -119,7 +113,6 @@ namespace ornek.Controllers
                     }
                 }
 
-                // Diet records and adherence percentage
                 string diyetQuery = @"
                 SELECT dt.DiyetID, d.TurAdi, dt.UygulandiMi, dt.Tarih
                 FROM DiyetTakip dt
@@ -131,7 +124,6 @@ namespace ornek.Controllers
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
                 ViewBag.Diyet = dtDiyet;
 
-                // Calculate diet adherence percentage
                 if (dtDiyet.Rows.Count > 0)
                 {
                     int appliedCount = 0;
@@ -150,7 +142,6 @@ namespace ornek.Controllers
                     ViewBag.DiyetAdherence = 0;
                 }
 
-                // Exercise records and adherence percentage
                 string egzersizQuery = @"
                 SELECT et.EgzersizID, e.TurAdi, et.YapildiMi, et.Tarih
                 FROM EgzersizTakip et
@@ -162,7 +153,6 @@ namespace ornek.Controllers
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
                 ViewBag.Egzersiz = dtEgzersiz;
 
-                // Calculate exercise adherence percentage
                 if (dtEgzersiz.Rows.Count > 0)
                 {
                     int doneCount = 0;
@@ -192,8 +182,6 @@ namespace ornek.Controllers
                 ViewBag.Belirtiler = _baglanti.ExecuteQuery(belirtiQuery,
                     new SqlParameter[] { new SqlParameter("@HastaID", hastaId) });
 
-                // Insulin records with date filtering
-                // Set default date range: last 7 days if not provided
                 startDate = startDate ?? DateTime.Today.AddDays(-7);
                 endDate = endDate ?? DateTime.Today;
                 ViewBag.StartDate = startDate;
@@ -216,7 +204,6 @@ namespace ornek.Controllers
                 DataTable dtInsulin = _baglanti.ExecuteQuery(insulinQuery, insulinParams.ToArray());
                 ViewBag.Insulin = dtInsulin;
 
-                // Prepare data for blood sugar chart
                 List<string> chartLabels = new List<string>();
                 List<decimal> chartData = new List<decimal>();
                 foreach (DataRow row in dtKanSekeri.Rows)
@@ -253,7 +240,6 @@ namespace ornek.Controllers
                 string belirtiQuery = "SELECT BelirtiID, BelirtiAdi FROM Belirti";
                 ViewBag.Belirtiler = _baglanti.ExecuteQuery(belirtiQuery);
 
-                // Fetch warnings for the patient to display on the page
                 int hastaId = HttpContext.Session.GetInt32("HastaID") ?? 0;
                 string uyariQuery = @"
             SELECT u.UyariID, u.UyariTuru, u.UyariMesaji, u.UyariTarihi
@@ -288,11 +274,9 @@ namespace ornek.Controllers
 
             try
             {
-                // Convert string time to TimeSpan for database
                 TimeSpan timeSpan = TimeSpan.Parse(olcumSaati);
                 bool isValidTime = IsValidTimeSlot(timeSpan);
 
-                // Insert blood sugar measurement (always record, regardless of time)
                 string insertQuery = @"
         INSERT INTO KanSekeri (HastaID, OlcumDegeri, OlcumTarihi, OlcumSaati, OlcumTuru)
         VALUES (@HastaID, @OlcumDegeri, @OlcumTarihi, @OlcumSaati, @OlcumTuru)
@@ -310,7 +294,6 @@ namespace ornek.Controllers
 
                 if (sonuc > 0)
                 {
-                    // Insert symptom if provided
                     if (belirtiId.HasValue && siddet.HasValue)
                     {
                         string belirtiInsertQuery = @"
@@ -328,7 +311,6 @@ namespace ornek.Controllers
                         _baglanti.ExecuteNonQuery(belirtiInsertQuery, belirtiParams);
                     }
 
-                    // Check blood sugar level and generate warning based on the table
                     string uyariTuru = "";
                     string uyariMesaji = "";
                     int doktorId = GetDoktorId(hastaId);
@@ -359,7 +341,6 @@ namespace ornek.Controllers
                         uyariMesaji = "Hastanın kan şekeri 200 mg/dL'nin üzerinde. Hiperglisemi durumu. Acil müdahale gerekebilir.";
                     }
 
-                    // Generate warning for all levels (including 70 to 200 mg/dL)
                     string uyariInsertQuery = @"
                 INSERT INTO Uyarilar (HastaID, DoktorID, UyariTuru, UyariMesaji, UyariTarihi, Okundu)
                 VALUES (@HastaID, @DoktorID, @UyariTuru, @UyariMesaji, GETDATE(), 0)
@@ -374,7 +355,6 @@ namespace ornek.Controllers
 
                     _baglanti.ExecuteNonQuery(uyariInsertQuery, uyariParams);
 
-                    // Warn for out-of-range time slot
                     if (!isValidTime)
                     {
                         string uyariTur = "Geçersiz Ölçüm Zamanı";
@@ -382,7 +362,6 @@ namespace ornek.Controllers
                         AddWarning(hastaId, uyariMesaj, uyariTur);
                     }
 
-                    // Check for missing measurements (less than 3 per day, only valid times)
                     string countQuery = @"
             SELECT COUNT(*) FROM KanSekeri
             WHERE HastaID = @HastaID AND OlcumTarihi = @OlcumTarihi 
@@ -406,7 +385,6 @@ namespace ornek.Controllers
                         AddWarning(hastaId, $"Hastanın günlük kan şekeri ölçüm sayısı yetersiz (<3). Durum izlenmelidir.", "Ölçüm Eksikliği (3'ten Az Giriş)");
                     }
 
-                    // Check for missing expected time slots
                     string recordedTimesQuery = @"
             SELECT OlcumSaati FROM KanSekeri
             WHERE HastaID = @HastaID AND OlcumTarihi = @OlcumTarihi
@@ -469,7 +447,6 @@ namespace ornek.Controllers
             return RedirectToAction("Index");
         }
 
-        // Method to check daily measurements for all patients
         private void CheckDailyMeasurements()
         {
             try
@@ -484,7 +461,6 @@ namespace ornek.Controllers
                 {
                     int hastaId = Convert.ToInt32(hastaRow["HastaID"]);
 
-                    // Check if a warning for missing measurements already exists for today
                     string existingWarningQuery = @"
                 SELECT COUNT(*) FROM Uyarilar
                 WHERE HastaID = @HastaID 
@@ -500,10 +476,9 @@ namespace ornek.Controllers
                     if (Convert.ToInt32(warningCount) > 0)
                     {
                         _logger.LogDebug("Skipping HastaID {HastaID} as a warning already exists for today.", hastaId);
-                        continue; // Skip if a warning already exists for today
+                        continue; 
                     }
 
-                    // Check daily measurements (any measurement, not just valid time slots)
                     string countQuery = @"
                 SELECT COUNT(*) FROM KanSekeri
                 WHERE HastaID = @HastaID AND OlcumTarihi = @OlcumTarihi
@@ -530,7 +505,6 @@ namespace ornek.Controllers
             }
         }
 
-        // Helper method to check if the measurement time is within valid time slots
         private bool IsValidTimeSlot(TimeSpan time)
         {
             return (time >= TimeSpan.Parse("07:00:00") && time <= TimeSpan.Parse("08:00:00")) ||
@@ -540,7 +514,6 @@ namespace ornek.Controllers
                    (time >= TimeSpan.Parse("22:00:00") && time <= TimeSpan.Parse("23:00:00"));
         }
 
-        // Helper method to get the doctor's ID for the patient
         private int GetDoktorId(int hastaId)
         {
             string doktorQuery = @"
@@ -885,7 +858,6 @@ namespace ornek.Controllers
 
         private void AddWarning(int hastaId, string uyariMesaji, string uyariTuru)
         {
-            // Get the patient's assigned doctor
             string doktorQuery = @"
         SELECT DoktorID FROM HastaDr WHERE HastaID = @HastaID
     ";

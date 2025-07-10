@@ -16,7 +16,7 @@ public class DailyMeasurementCheckService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.Now;
-            var nextRun = now.Date.AddDays(1).AddMinutes(-1); // Run at 23:59
+            var nextRun = now.Date.AddDays(1).AddMinutes(-1); // 23:59
             var delay = nextRun - now;
 
             if (delay.TotalMilliseconds > 0)

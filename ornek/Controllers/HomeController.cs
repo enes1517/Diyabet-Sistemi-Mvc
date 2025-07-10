@@ -15,7 +15,6 @@ namespace Proje3.Controllers
     {
         private readonly string connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog =Diabetes; Integrated Security = True;";
 
-        // Password hashing function
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -30,7 +29,6 @@ namespace Proje3.Controllers
             }
         }
 
-        // Generate random password
         private string GenerateRandomPassword()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -39,13 +37,11 @@ namespace Proje3.Controllers
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        // Login GET
         public IActionResult Login()
         {
             return View();
         }
 
-        // Login POST
         [HttpPost]
         public IActionResult Login(Models.LoginModel model)
         {
@@ -81,13 +77,11 @@ namespace Proje3.Controllers
             return View(model);
         }
 
-        // Register GET
         public IActionResult Register()
         {
             return View();
         }
 
-        // Register POST
         [HttpPost]
         public IActionResult Register(Models.RegisterModel model)
         {
@@ -96,7 +90,6 @@ namespace Proje3.Controllers
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    // Check if TC or Email already exists
                     string checkQuery = "SELECT COUNT(*) FROM Kullanici WHERE TC = @TC OR Email = @Email";
                     using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
                     {
@@ -110,7 +103,6 @@ namespace Proje3.Controllers
                         }
                     }
 
-                    // Insert Kullanici
                     string kullaniciQuery = @"INSERT INTO Kullanici (TC, Ad, Soyad, Email, Sifre, KullaniciTipi, DogumTarihi, Cinsiyet, KayitTarihi)
                                             VALUES (@TC, @Ad, @Soyad, @Email, @Sifre, @KullaniciTipi, @DogumTarihi, @Cinsiyet, @KayitTarihi);
                                             SELECT SCOPE_IDENTITY();";
@@ -151,14 +143,12 @@ namespace Proje3.Controllers
                         }
                     }
 
-                    // Simulate sending email with credentials (in real app, use SMTP)
                     return RedirectToAction("Login");
                 }
             }
             return View(model);
         }
 
-        // Doktor Dashboard
         public IActionResult DoktorDashboard()
         {
             if (HttpContext.Session.GetString("KullaniciTipi") != "Doktor") return RedirectToAction("Login");
@@ -197,7 +187,6 @@ namespace Proje3.Controllers
             return View(hastalar);
         }
 
-        // Hasta Dashboard
         public IActionResult HastaDashboard()
         {
             if (HttpContext.Session.GetString("KullaniciTipi") != "Hasta") return RedirectToAction("Login");
@@ -205,7 +194,6 @@ namespace Proje3.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                // Get patient info
                 string query = @"SELECT h.HastaID, h.KullaniciID, h.Boy, h.Kilo, k.Ad, k.Soyad, k.Email
                                FROM Hasta h JOIN Kullanici k ON h.KullaniciID = k.KullaniciID
                                WHERE h.KullaniciID = @KullaniciID";
@@ -233,7 +221,6 @@ namespace Proje3.Controllers
                     }
                 }
 
-                // Get diet plans
                 string diyetQuery = @"SELECT dt.DiyetID, dt.Tarih, dt.UygulandiMi, d.TurAdi
                                     FROM DiyetTakip dt
                                     JOIN DiyetTuru d ON dt.DiyetTuruID = d.DiyetTuruID
@@ -259,7 +246,6 @@ namespace Proje3.Controllers
                 }
                 ViewBag.Diyetler = diyetler;
 
-                // Get exercise plans
                 string egzersizQuery = @"SELECT et.EgzersizID, et.Tarih, et.YapildiMi, e.TurAdi
                                        FROM EgzersizTakip et
                                        JOIN EgzersizTuru e ON et.EgzersizTuruID = e.EgzersizTuruID

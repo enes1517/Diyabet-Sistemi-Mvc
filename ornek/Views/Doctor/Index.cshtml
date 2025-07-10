@@ -1,5 +1,4 @@
 ﻿@using System.Data
-<!-- Index.cshtml -->
 @{
     ViewData["Title"] = "Doktor Ana Sayfa";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -207,7 +206,6 @@
 
 @section Scripts {
     <script>
-        // Client-side filtering for alerts
         document.getElementById('alertFilter').addEventListener('change', function () {
             var filter = this.value;
             var rows = document.querySelectorAll('#alertsTable tbody tr');
