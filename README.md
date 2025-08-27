@@ -1,4 +1,5 @@
 Bu proje, hasta ve doktor verilerini, günlük ölçümleri ve diyabet bakımı için bildirimleri yönetmek amacıyla ASP.NET MVC ile geliştirilmiş bir Diyabet Sistemi’dir.
+
 Özellikler
 Hasta Yönetimi: PatientController aracılığıyla hastalar ve ölçümlerin takibi.
 Doktor Yönetimi: DoctorController ile doktor kontrol panelleri veya hasta gözetimi.
