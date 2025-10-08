@@ -1,6 +1,13 @@
-Diyabet Sistemi, diyabet hastalarının ve doktorlarının hayatını kolaylaştırmak için tasarlanmış, güçlü ve kullanıcı dostu bir ASP.NET MVC uygulamasıdır. Kan şekeri takibinden hatırlatmalara, hasta yönetiminden doktor denetimine kadar her şey bu sistemde! 🚀
+Diyabet Sistemi, diyabet hastalarının ve doktorlarının hayatını kolaylaştırmak için tasarlanmış, güçlü ve kullanıcı dostu bir ASP.NET MVC uygulamasıdır. 
+
+Kan şekeri takibinden hatırlatmalara, hasta yönetiminden doktor denetimine kadar her şey bu sistemde! 🚀
+
 ✨ Özellikler
+
+
 Hasta Yönetimi 🧑‍⚕️: PatientController ile hastaların bilgilerini ve günlük ölçümlerini kolayca takip edin.
+
+
 Doktor Kontrol Paneli 👨‍⚕️: DoctorController ile doktorlar hastalarını izleyebilir, verileri analiz edebilir ve bakım süreçlerini yönetebilir.
 Hesap Yönetimi 🔐: AccountController ile güvenli giriş ve kayıt işlemleri.
 Günlük Ölçüm Kontrolleri 📊: DailyMeasurementCheckService.cs ile kan şekeri seviyelerini otomatik olarak izleyin ve değerlendirin.
